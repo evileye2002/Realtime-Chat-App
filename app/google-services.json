@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "791345843074",
+    "project_id": "neko-chat-app",
+    "storage_bucket": "neko-chat-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:791345843074:android:4331732c341731eb161d9b",
+        "android_client_info": {
+          "package_name": "com.evileye2002.real_timechatapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDsZL1r--pgxeV5bO8oYvdXEyaHy9jZmqg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

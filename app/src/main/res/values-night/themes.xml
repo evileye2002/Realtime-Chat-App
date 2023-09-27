@@ -1,0 +1,7 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Base.Theme.RealtimeChatApp" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Light theme. -->
+        <item name="colorPrimary">@color/primary</item>
+        <item name="android:statusBarColor">@color/primary</item>
+    </style>
+</resources>
