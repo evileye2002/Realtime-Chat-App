@@ -41,6 +41,7 @@
                 app:riv_oval="true"/>
 
             <ImageView
+                android:id="@+id/iconCamera"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -119,6 +120,7 @@
                 android:textColor="@color/white"
                 android:textSize="@dimen/_13sdp"
                 android:textStyle="bold"
+                android:backgroundTint="@color/primary_light"
                 app:cornerRadius="@dimen/_8sdp"/>
 
             <ProgressBar
@@ -141,7 +143,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/already_have_an_account"
-                android:textColor="@color/primary_text"
+                android:textColor="@color/secondary_text"
                 android:textSize="@dimen/_13sdp"
                 android:textStyle="bold"/>
 
@@ -150,7 +152,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/_5sdp"
                 android:text="@string/sign_in"
-                android:textColor="@color/primary_text"
+                android:textColor="@color/primary_text_light"
                 android:textSize="@dimen/_13sdp"
                 android:textStyle="bold"/>
 

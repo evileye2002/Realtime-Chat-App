@@ -73,6 +73,7 @@
             android:textColor="@color/white"
             android:textSize="@dimen/_13sdp"
             android:textStyle="bold"
+            android:backgroundTint="@color/primary_light"
             app:cornerRadius="@dimen/_8sdp"/>
 
         <TextView
@@ -81,7 +82,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/_10sdp"
             android:text="@string/forgot_password"
-            android:textColor="@color/primary_text"
+            android:textColor="@color/secondary_text"
             android:textSize="@dimen/_13sdp"
             android:textStyle="bold"/>
 
@@ -96,7 +97,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/dont_have_an_account"
-                android:textColor="@color/primary_text"
+                android:textColor="@color/secondary_text"
                 android:textSize="@dimen/_13sdp"
                 android:textStyle="bold"/>
 
@@ -105,7 +106,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/_5sdp"
                 android:text="@string/sign_up"
-                android:textColor="@color/primary_text"
+                android:textColor="@color/primary_text_light"
                 android:textSize="@dimen/_13sdp"
                 android:textStyle="bold"/>
 

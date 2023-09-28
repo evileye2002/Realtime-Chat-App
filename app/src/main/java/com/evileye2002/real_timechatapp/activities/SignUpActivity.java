@@ -79,9 +79,10 @@ public class SignUpActivity extends AppCompatActivity {
                     preferenceManager.putString(Constants.KEY_NAME, binding.inputName.getText().toString());
                     preferenceManager.putString(Constants.KEY_IMAGE, encodedImage);
 
-                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                    /*Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
+                    startActivity(intent);*/
+                    onBackPressed();
                 })
                 .addOnFailureListener(exception ->{
                     loading(false);
@@ -149,6 +150,7 @@ public class SignUpActivity extends AppCompatActivity {
                         InputStream inputStream = getContentResolver().openInputStream(imageUri);
                         Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
                         binding.imageProfile.setImageBitmap(bitmap);
+                        binding.iconCamera.setVisibility(View.GONE);
                         encodedImage = encodeImage(bitmap);
                     }
                     catch (FileNotFoundException e){
