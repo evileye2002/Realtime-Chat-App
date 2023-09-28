@@ -2,8 +2,8 @@
     <string name="app_name">NekoC</string>
     <string name="welcome_back">Mừng quay trở lại!</string>
     <string name="login_to_continue">Đăng nhập để tiếp tục</string>
-    <string name="account">Tài khoản...</string>
-    <string name="password">Mật khẩu...</string>
+    <string name="email">Email</string>
+    <string name="password">Mật khẩu</string>
     <string name="sign_in">Đăng nhập</string>
     <string name="sign_up_account">Đăng ký tài khoản</string>
     <string name="add_image">Chọn ảnh</string>

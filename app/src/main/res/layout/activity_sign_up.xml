@@ -27,6 +27,7 @@
             android:textStyle="bold"/>
 
         <FrameLayout
+            android:id="@+id/layoutImage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/_20sdp">
@@ -39,14 +40,12 @@
                 android:scaleType="centerCrop"
                 app:riv_oval="true"/>
 
-            <TextView
+            <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="@string/add_image"
-                android:textColor="@color/secondary_text"
-                android:textSize="@dimen/_10sdp"
-                tools:ignore="TextSizeCheck" />
+                android:src="@drawable/ic_camera"
+                app:tint="@color/primary"/>
 
         </FrameLayout>
 
@@ -65,12 +64,12 @@
             android:textSize="@dimen/_13sdp"/>
 
         <EditText
-            android:id="@+id/inputAccount"
+            android:id="@+id/inputEmail"
             android:layout_width="match_parent"
             android:layout_height="@dimen/_45sdp"
             android:layout_marginTop="@dimen/_16sdp"
             android:background="@drawable/background_input"
-            android:hint="@string/account"
+            android:hint="@string/email"
             android:imeOptions="actionNext"
             android:importantForAutofill="no"
             android:inputType="text"
@@ -106,16 +105,30 @@
             android:textColor="@color/primary_text"
             android:textSize="@dimen/_13sdp"/>
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSignUp"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="@dimen/_50sdp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/_16sdp"
-            android:text="@string/sign_up"
-            android:textColor="@color/white"
-            android:textSize="@dimen/_13sdp"
-            android:textStyle="bold"
-            app:cornerRadius="@dimen/_8sdp"/>
+            android:animateLayoutChanges="true">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSignUp"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_50sdp"
+                android:text="@string/sign_up"
+                android:textColor="@color/white"
+                android:textSize="@dimen/_13sdp"
+                android:textStyle="bold"
+                app:cornerRadius="@dimen/_8sdp"/>
+
+            <ProgressBar
+                android:id="@+id/processBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="invisible"/>
+
+        </FrameLayout>
 
         <LinearLayout
             android:id="@+id/textSignIn"
