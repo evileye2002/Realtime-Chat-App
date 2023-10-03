@@ -4,7 +4,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.app.Instrumentation;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,22 +13,19 @@ import android.provider.MediaStore;
 import android.util.Base64;
 import android.util.Patterns;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Toast;
 
-import com.evileye2002.real_timechatapp.R;
-import com.evileye2002.real_timechatapp.databinding.ActivitySignInBinding;
 import com.evileye2002.real_timechatapp.databinding.ActivitySignUpBinding;
-import com.evileye2002.real_timechatapp.utilities.Constants;
+import com.evileye2002.real_timechatapp.utilities.Const;
+import com.evileye2002.real_timechatapp.utilities.Funct;
 import com.evileye2002.real_timechatapp.utilities.PreferenceManager;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.HashMap;
-import java.util.regex.Pattern;
 
 public class SignUpActivity extends AppCompatActivity {
     ActivitySignUpBinding binding;
@@ -39,6 +35,7 @@ public class SignUpActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         binding = ActivitySignUpBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         preferenceManager = new PreferenceManager(getApplicationContext());
@@ -58,35 +55,27 @@ public class SignUpActivity extends AppCompatActivity {
         });
     }
 
-    void showToast(String msg){
-        Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
-    }
-
     void signUp(){
         loading(true);
         FirebaseFirestore database = FirebaseFirestore.getInstance();
         HashMap<String, Object> user = new HashMap<>();
-        user.put(Constants.KEY_NAME, binding.inputName.getText().toString());
-        user.put(Constants.KEY_EMAIL, binding.inputEmail.getText().toString());
-        user.put(Constants.KEY_PASSWORD, binding.inputPassword.getText().toString());
-        user.put(Constants.KEY_IMAGE, encodedImage);
-        database.collection(Constants.KEY_COLLECTION_USERS)
+        user.put(Const.KEY_NAME, binding.inputName.getText().toString());
+        user.put(Const.KEY_EMAIL, binding.inputEmail.getText().toString());
+        user.put(Const.KEY_PASSWORD, binding.inputPassword.getText().toString());
+        user.put(Const.KEY_IMAGE, encodedImage);
+        database.collection(Const.KEY_COLLECTION_USERS)
                 .add(user)
                 .addOnSuccessListener(documentReference -> {
                     loading(false);
-                    preferenceManager.putBoolean(Constants.KEY_IS_SIGNED_IN, true);
-                    preferenceManager.putString(Constants.KEY_USER_ID, documentReference.getId());
-                    preferenceManager.putString(Constants.KEY_NAME, binding.inputName.getText().toString());
-                    preferenceManager.putString(Constants.KEY_IMAGE, encodedImage);
+                    preferenceManager.putBoolean(Const.KEY_IS_SIGNED_IN, true);
+                    preferenceManager.putString(Const.KEY_USER_ID, documentReference.getId());
+                    preferenceManager.putString(Const.KEY_NAME, binding.inputName.getText().toString());
+                    preferenceManager.putString(Const.KEY_IMAGE, encodedImage);
 
                     /*Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);*/
                     onBackPressed();
-                })
-                .addOnFailureListener(exception ->{
-                    loading(false);
-                    showToast(exception.getMessage());
                 });
     }
 
@@ -103,27 +92,27 @@ public class SignUpActivity extends AppCompatActivity {
 
     Boolean isValidUserDetails(){
         if(encodedImage == null){
-            showToast("Chưa chọn ảnh!");
+            Funct.showToast(getApplicationContext(),"Chưa chọn ảnh!");
             return false;
         }
         if(binding.inputName.getText().toString().trim().isEmpty()){
-            showToast("Chưa nhập Họ và Tên!");
+            Funct.showToast(getApplicationContext(),"Chưa nhập Họ và Tên!");
             return false;
         }
         if(binding.inputEmail.getText().toString().trim().isEmpty()){
-            showToast("Chưa nhập Email!");
+            Funct.showToast(getApplicationContext(),"Chưa nhập Email!");
             return false;
         }
         if(!Patterns.EMAIL_ADDRESS.matcher(binding.inputEmail.getText().toString()).matches()){
-            showToast("Sai định dạng Email!");
+            Funct.showToast(getApplicationContext(),"Sai định dạng Email!");
             return false;
         }
         if(binding.inputPassword.getText().toString().trim().isEmpty()){
-            showToast("Chưa nhập Mật khẩu!");
+            Funct.showToast(getApplicationContext(),"Chưa nhập Mật khẩu!");
             return false;
         }
         if(!binding.inputPassword.getText().toString().trim().equals(binding.inputConfirmPassword.getText().toString().trim())){
-            showToast("Mật khẩu xác nhận không chính xác!");
+            Funct.showToast(getApplicationContext(),"Mật khẩu xác nhận không chính xác!");
             binding.inputPassword.setText("");
             return false;
         }

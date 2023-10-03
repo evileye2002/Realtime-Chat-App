@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navRooms"
+        android:icon="@drawable/ic_chat_bubble"
+        android:title="@string/rooms" />
+    <item
+        android:id="@+id/navFriend"
+        android:icon="@drawable/ic_friends"
+        android:title="@string/friends" />
+
+    <group android:checkableBehavior="single" android:visible="false">
+        <item android:title="">
+            <menu>
+
+            </menu>
+        </item>
+    </group>
+
+    <item android:title="">
+        <menu>
+            <item
+                android:id="@+id/navSignOut"
+                android:icon="@drawable/ic_power"
+                android:title="@string/sign_out" />
+        </menu>
+    </item>
+</menu>

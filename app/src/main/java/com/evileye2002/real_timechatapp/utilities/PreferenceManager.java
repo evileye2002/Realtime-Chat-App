@@ -7,7 +7,7 @@ public class PreferenceManager {
     final SharedPreferences sharedPreferences;
 
     public PreferenceManager(Context context) {
-        this.sharedPreferences = context.getSharedPreferences(Constants.KEY_PREFERENCE_NAME,Context.MODE_PRIVATE);
+        this.sharedPreferences = context.getSharedPreferences(Const.KEY_PREFERENCE_NAME,Context.MODE_PRIVATE);
     }
 
     public void putBoolean(String key, Boolean value){

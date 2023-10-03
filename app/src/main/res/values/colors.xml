@@ -1,15 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="primary">#1C2E46</color>
-    <color name="primary_light">#235DE3</color>
-    <color name="primary_dark">#142232</color>
-    <color name="primary_text">#212121</color>
-    <color name="primary_text_light">#235DE3</color>
-    <color name="secondary_text">#757575</color>
-    <color name="input_background">#ECECEC</color>
-    <color name="icon_background">#20FFFFFF</color>
     <color name="error">#B00020</color>
-    <color name="received_message_background">#090D16</color>
+    <color name="online">#4FF878</color>
+
+    <!--Light Theme-->
+    <color name="primary_light">#FFFFFF</color>
+    <color name="secondary_light">#EBF5FF</color>
+    <color name="primary_text_light">#212121</color>
+    <color name="secondary_text_light">#757575</color>
+    <color name="input_bg_light">#ECECEC</color>
+    <color name="icon_bg_light">#EBF5FF</color>
+    <color name="icon_light">#0084FF</color>
+    <color name="received_message_bg_light">#EBF5FF</color>
+    <color name="sent_message_bg_light">#0084FF</color>
+
+    <!--Dark Theme-->
+    <color name="primary_dark">#242526</color>
+    <color name="secondary_dark">#242526</color>
+    <color name="primary_text_dark">#E4E6EB</color>
+    <color name="secondary_text_dark">#898C90</color>
+    <color name="input_bg_dark">#3A3B3C</color>
+    <color name="icon_dark">#242526</color>
+    <color name="icon_bg_dark">#242526</color>
+    <color name="received_message_bg_dark">#3E4042</color>
+    <color name="sent_message_bg_dark">#3E4042</color>
+
 </resources>
