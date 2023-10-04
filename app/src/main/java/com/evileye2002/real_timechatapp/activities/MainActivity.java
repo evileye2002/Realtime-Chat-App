@@ -16,7 +16,6 @@ import com.evileye2002.real_timechatapp.utilities.Funct;
 import com.evileye2002.real_timechatapp.utilities.PreferenceManager;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
-import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.HashMap;
 
@@ -49,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
         preferenceManager = new PreferenceManager(getApplicationContext());
         binding.navView.bringToFront();
         navViewHeader = binding.navView.getHeaderView(0);
-        currentUserDoc = Const.database.collection(Const.KEY_COLLECTION_USERS).document(preferenceManager.getString(Const.KEY_USER_ID));
+        currentUserDoc = Const.firestore.collection(Const.KEY_COLLECTION_USERS).document(preferenceManager.getString(Const.KEY_USER_ID));
     }
 
     void setListener() {
@@ -63,9 +62,8 @@ public class MainActivity extends AppCompatActivity {
 
             }
             if (item.getItemId() == R.id.navFriend) {
-                /*Intent intent = new Intent(getApplicationContext(), FriendActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-                startActivity(intent);*/
+                Intent intent = new Intent(getApplicationContext(), FriendActivity.class);
+                startActivity(intent);
             }
             if (item.getItemId() == R.id.navSignOut) {
                 signOut();
@@ -75,7 +73,8 @@ public class MainActivity extends AppCompatActivity {
 
         ImageView btnSettings = navViewHeader.findViewById(R.id.imageSettings);
         btnSettings.setOnClickListener(v -> {
-            Funct.showToast(getApplicationContext(), "click setting");
+            /*Intent intent = new Intent(getApplicationContext(), SettingActivity.class);
+            startActivity(intent);*/
         });
     }
 
@@ -99,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void getToken() {
-        FirebaseMessaging.getInstance().getToken()
+        Const.firestoreMessaging.getToken()
                 .addOnSuccessListener(this::updateToken)
                 .addOnFailureListener(e -> {
 

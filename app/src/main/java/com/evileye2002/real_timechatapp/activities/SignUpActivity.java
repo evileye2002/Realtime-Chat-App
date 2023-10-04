@@ -14,7 +14,6 @@ import android.util.Base64;
 import android.util.Patterns;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.EditText;
 
 import com.evileye2002.real_timechatapp.R;
 import com.evileye2002.real_timechatapp.databinding.ActivitySignUpBinding;
@@ -22,7 +21,6 @@ import com.evileye2002.real_timechatapp.utilities.Const;
 import com.evileye2002.real_timechatapp.utilities.Funct;
 import com.evileye2002.real_timechatapp.utilities.PreferenceManager;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.ByteArrayOutputStream;
@@ -66,7 +64,6 @@ public class SignUpActivity extends AppCompatActivity {
         Funct.onTextChange(binding.inputName, binding.layoutName, this::onTextChange);
         Funct.onTextChange(binding.inputPassword, binding.layoutPassword, this::onTextChange);
         Funct.onTextChange(binding.inputConfirmPassword, binding.layoutConfirmPassword, this::onTextChange);
-
         Funct.onTextChange(binding.inputEmail, binding.layoutEmail, (s, textInputLayout) -> {
             if (s.toString().isEmpty())
                 return;
@@ -79,7 +76,7 @@ public class SignUpActivity extends AppCompatActivity {
             }
 
             //Check Email Exist
-            Const.database
+            Const.firestore
                     .collection(Const.KEY_COLLECTION_USERS)
                     .whereEqualTo(Const.KEY_USER_EMAIL, s.toString().trim().toLowerCase())
                     .get()

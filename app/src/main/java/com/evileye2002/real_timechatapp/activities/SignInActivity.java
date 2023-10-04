@@ -4,12 +4,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Patterns;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Toast;
 
 import com.evileye2002.real_timechatapp.R;
 import com.evileye2002.real_timechatapp.databinding.ActivitySignInBinding;
@@ -18,12 +15,6 @@ import com.evileye2002.real_timechatapp.utilities.Funct;
 import com.evileye2002.real_timechatapp.utilities.PreferenceManager;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
-
-import org.w3c.dom.Document;
-
-import java.util.HashMap;
-import java.util.Objects;
 
 public class SignInActivity extends AppCompatActivity {
     ActivitySignInBinding binding;
@@ -73,7 +64,7 @@ public class SignInActivity extends AppCompatActivity {
 
     void signIn() {
         loading(true);
-        Const.database
+        Const.firestore
                 .collection(Const.KEY_COLLECTION_USERS)
                 .whereEqualTo(Const.KEY_USER_EMAIL, binding.inputEmail.getText().toString().trim().toLowerCase())
                 .whereEqualTo(Const.KEY_USER_PASSWORD, binding.inputPassword.getText().toString().trim())
@@ -83,7 +74,7 @@ public class SignInActivity extends AppCompatActivity {
                     if (isCorrect) {
                         if(binding.layoutPassword.getError() != null)
                             binding.layoutPassword.setError(null);
-                        
+
                         DocumentSnapshot currentUser = task.getResult().getDocuments().get(0);
                         preferenceManager.putBoolean(Const.KEY_IS_SIGNED_IN, true);
                         preferenceManager.putString(Const.KEY_USER_ID, currentUser.getId());
