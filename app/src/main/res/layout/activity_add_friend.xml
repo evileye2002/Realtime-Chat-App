@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
-    tools:context=".activities.FriendActivity">
+    tools:context=".activities.AddFriendActivity">
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/imageBack"
@@ -19,33 +19,21 @@
         app:layout_constraintTop_toTopOf="parent"
         app:tint="@color/icon_light" />
 
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/imageAddFriend"
-        android:layout_width="@dimen/_45sdp"
-        android:layout_height="@dimen/_45sdp"
-        android:layout_marginEnd="@dimen/_4sdp"
-        android:layout_marginTop="@dimen/_4sdp"
-        android:padding="@dimen/_11sdp"
-        android:src="@drawable/ic_add_friend"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/icon_light" />
-
     <TextView
         android:id="@+id/textName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/_8sdp"
-        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_57sdp"
+        android:layout_marginStart="@dimen/_6sdp"
         android:ellipsize="end"
         android:gravity="center"
         android:maxLines="1"
-        android:text="@string/friends"
+        android:text="@string/add_friend"
         android:textColor="@color/primary_text_light"
         android:textSize="@dimen/_14sdp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@id/imageBack"
-        app:layout_constraintEnd_toStartOf="@id/imageAddFriend"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/imageBack"
         app:layout_constraintTop_toTopOf="@id/imageBack" />
 
@@ -53,9 +41,9 @@
         android:id="@+id/layoutSearch"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/_16sdp"
+        android:layout_marginStart="@dimen/_20sdp"
         android:layout_marginTop="@dimen/_16sdp"
-        android:layout_marginEnd="@dimen/_16sdp"
+        android:layout_marginEnd="@dimen/_20sdp"
         android:background="@drawable/bg_icon"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

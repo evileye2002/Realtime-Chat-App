@@ -2,12 +2,13 @@ package com.evileye2002.real_timechatapp.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
-import com.evileye2002.real_timechatapp.adapters.ConversationAdapter;
+import com.evileye2002.real_timechatapp.adapters.FriendAdapter;
 import com.evileye2002.real_timechatapp.databinding.ActivityFriendBinding;
-import com.evileye2002.real_timechatapp.models.Conversation;
+import com.evileye2002.real_timechatapp.models.User;
 import com.evileye2002.real_timechatapp.utilities.Const;
 import com.evileye2002.real_timechatapp.utilities.PreferenceManager;
 import com.google.firebase.firestore.DocumentReference;
@@ -20,6 +21,7 @@ public class FriendActivity extends AppCompatActivity {
     ActivityFriendBinding binding;
     PreferenceManager manager;
     DocumentReference currentUser;
+    String currentUserID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,15 +30,34 @@ public class FriendActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         init();
         setListener();
-        getConversations();
+        getFriends();
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        getFriends();
     }
 
     void init() {
         manager = new PreferenceManager(getApplicationContext());
-        currentUser = Const.currentUser(manager.getString(Const.KEY_USER_ID));
+        currentUserID = manager.getString(Const.ID);
+        currentUser = Const.userDoc(currentUserID);
     }
 
     void setListener() {
+        binding.imageBack.setOnClickListener(v -> onBackPressed());
+        binding.imageAddFriend.setOnClickListener(v -> {
+            Intent intent = new Intent(getApplicationContext(), AddFriendActivity.class);
+            startActivity(intent);
+        });
 
     }
 
@@ -50,32 +71,33 @@ public class FriendActivity extends AppCompatActivity {
         }
     }
 
-    void getConversations() {
-        currentUser.get()
-                .addOnCompleteListener(task -> {
-                    boolean isExist = task.isSuccessful() && task.getResult() != null && task.getResult().getString(Const.KEY_COLLECTION_CONVERSATIONS) != null;
-                    if (isExist) {
-                        String currentUSerConversations = task.getResult().getString(Const.KEY_COLLECTION_CONVERSATIONS);
-                        Const.firestore.collection(Const.KEY_COLLECTION_USERS)
-                                .get()
-                                .addOnCompleteListener(task1 -> {
-                                    List<Conversation> conversationList = new ArrayList<>();
-                                    boolean isExist1 = task1.isSuccessful() && task1.getResult() != null;
-                                    if (isExist1) {
-                                        for (QueryDocumentSnapshot snapshot : task1.getResult()) {
-                                            if (currentUSerConversations.contains(snapshot.getId())) {
-                                                Conversation con = snapshot.toObject(Conversation.class);
-                                                conversationList.add(con);
-
-                                                ConversationAdapter adapter = new ConversationAdapter(manager.getString(Const.KEY_USER_ID), conversationList, conversation -> {
-
-                                                });
-                                                binding.recyclerView.setAdapter(adapter);
-                                            }
-                                        }
-                                    }
-                                });
-                    }
-                });
+    void getFriends() {
+        Const.user_collection.get().addOnCompleteListener(task -> {
+            loading(false);
+            List<User> userList = new ArrayList<>();
+            boolean isExist = task.isSuccessful() && task.getResult() != null && task.getResult().getDocuments().size() > 0;
+            if (isExist) {
+                for (QueryDocumentSnapshot snapshot : task.getResult()) {
+                    if (snapshot.getId().equals(currentUserID))
+                        continue;
+                    if(snapshot.getString(Const.FRIENDS) != null)
+                        if (snapshot.getString(Const.FRIENDS).contains(currentUserID)) {
+                            User user = snapshot.toObject(User.class);
+                            user.id = snapshot.getId();
+                            userList.add(user);
+                        }
+                }
+                if (userList.size() > 0) {
+                    FriendAdapter adapter = new FriendAdapter(userList, user -> {
+                        Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
+                        intent.putExtra(Const.USER, user);
+                        startActivity(intent);
+                        finish();
+                    });
+                    binding.recyclerView.setAdapter(adapter);
+                }
+            }
+        });
     }
+
 }

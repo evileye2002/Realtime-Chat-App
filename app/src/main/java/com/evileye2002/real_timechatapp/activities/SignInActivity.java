@@ -23,9 +23,9 @@ public class SignInActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         preferenceManager = new PreferenceManager(getApplicationContext());
-        if (preferenceManager.getBoolean(Const.KEY_IS_SIGNED_IN)) {
+        if (preferenceManager.getBoolean(Const.IS_SIGNED_IN)) {
             startActivity(new Intent(getApplicationContext(), MainActivity.class));
             finish();
         }
@@ -65,9 +65,9 @@ public class SignInActivity extends AppCompatActivity {
     void signIn() {
         loading(true);
         Const.firestore
-                .collection(Const.KEY_COLLECTION_USERS)
-                .whereEqualTo(Const.KEY_USER_EMAIL, binding.inputEmail.getText().toString().trim().toLowerCase())
-                .whereEqualTo(Const.KEY_USER_PASSWORD, binding.inputPassword.getText().toString().trim())
+                .collection(Const.COLLECTION_USERS)
+                .whereEqualTo(Const.EMAIL, binding.inputEmail.getText().toString().trim().toLowerCase())
+                .whereEqualTo(Const.PASSWORD, binding.inputPassword.getText().toString().trim())
                 .get()
                 .addOnCompleteListener(task -> {
                     boolean isCorrect = task.isSuccessful() && task.getResult() != null && task.getResult().getDocuments().size() == 1;
@@ -76,10 +76,10 @@ public class SignInActivity extends AppCompatActivity {
                             binding.layoutPassword.setError(null);
 
                         DocumentSnapshot currentUser = task.getResult().getDocuments().get(0);
-                        preferenceManager.putBoolean(Const.KEY_IS_SIGNED_IN, true);
-                        preferenceManager.putString(Const.KEY_USER_ID, currentUser.getId());
-                        preferenceManager.putString(Const.KEY_USER_NAME, currentUser.getString(Const.KEY_USER_NAME));
-                        preferenceManager.putString(Const.KEY_USER_IMAGE, currentUser.getString(Const.KEY_USER_IMAGE));
+                        preferenceManager.putBoolean(Const.IS_SIGNED_IN, true);
+                        preferenceManager.putString(Const.ID, currentUser.getId());
+                        preferenceManager.putString(Const.NAME, currentUser.getString(Const.NAME));
+                        preferenceManager.putString(Const.IMAGE, currentUser.getString(Const.IMAGE));
 
                         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

@@ -3,8 +3,12 @@ package com.evileye2002.real_timechatapp.activities;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -30,22 +34,22 @@ import java.util.HashMap;
 
 public class SignUpActivity extends AppCompatActivity {
     ActivitySignUpBinding binding;
-    PreferenceManager preferenceManager;
+    PreferenceManager manager;
     String encodedImage;
     Boolean isExistEmail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         binding = ActivitySignUpBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         init();
         setListener();
     }
 
-    void init(){
-        preferenceManager = new PreferenceManager(getApplicationContext());
+    void init() {
+        manager = new PreferenceManager(getApplicationContext());
     }
 
     void setListener() {
@@ -56,9 +60,7 @@ public class SignUpActivity extends AppCompatActivity {
             }
         });
         binding.layoutImage.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            pickImage.launch(intent);
+            requestPermission();
         });
 
         Funct.onTextChange(binding.inputName, binding.layoutName, this::onTextChange);
@@ -77,8 +79,8 @@ public class SignUpActivity extends AppCompatActivity {
 
             //Check Email Exist
             Const.firestore
-                    .collection(Const.KEY_COLLECTION_USERS)
-                    .whereEqualTo(Const.KEY_USER_EMAIL, s.toString().trim().toLowerCase())
+                    .collection(Const.COLLECTION_USERS)
+                    .whereEqualTo(Const.EMAIL, s.toString().trim().toLowerCase())
                     .get()
                     .addOnCompleteListener(task -> {
                         boolean isExist = task.isSuccessful() && task.getResult() != null && task.getResult().getDocuments().size() > 0;
@@ -99,21 +101,30 @@ public class SignUpActivity extends AppCompatActivity {
             textInputLayout.setError(null);
     }
 
+    void requestPermission() {
+        boolean isHasPermission = ContextCompat.checkSelfPermission(getApplicationContext(),
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+        if (isHasPermission) {
+            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            pickImage.launch(intent);
+        } else
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 100);
+    }
+
     void signUp() {
         loading(true);
         FirebaseFirestore database = FirebaseFirestore.getInstance();
         HashMap<String, Object> user = new HashMap<>();
-        user.put(Const.KEY_USER_NAME, binding.inputName.getText().toString());
-        user.put(Const.KEY_USER_EMAIL, binding.inputEmail.getText().toString());
-        user.put(Const.KEY_USER_PASSWORD, binding.inputPassword.getText().toString());
-        user.put(Const.KEY_USER_IMAGE, encodedImage);
+        user.put(Const.NAME, binding.inputName.getText().toString());
+        user.put(Const.EMAIL, binding.inputEmail.getText().toString());
+        user.put(Const.PASSWORD, binding.inputPassword.getText().toString());
+        user.put(Const.IMAGE, encodedImage);
 
-        database.collection(Const.KEY_COLLECTION_USERS)
-                .add(user)
-                .addOnSuccessListener(documentReference -> {
-                    loading(false);
-                    onBackPressed();
-                });
+        Const.user_collection.add(user).addOnSuccessListener(documentReference -> {
+            loading(false);
+            onBackPressed();
+        });
     }
 
     void loading(Boolean isLoading) {
@@ -181,10 +192,10 @@ public class SignUpActivity extends AppCompatActivity {
         return Base64.encodeToString(bytes, Base64.DEFAULT);
     }
 
-    final ActivityResultLauncher<Intent> pickImage = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+    final ActivityResultLauncher<Intent> pickImage = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getResultCode() == RESULT_OK) {
                     Uri imageUri = result.getData().getData();
-
                     try {
                         InputStream inputStream = getContentResolver().openInputStream(imageUri);
                         Bitmap bitmap = BitmapFactory.decodeStream(inputStream);

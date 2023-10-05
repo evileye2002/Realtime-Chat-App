@@ -63,7 +63,7 @@
             app:layout_constraintTop_toBottomOf="@id/imageMenu">
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/roomsRecyclerView"
+                android:id="@+id/recyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
@@ -87,14 +87,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/_24sdp"
-            android:layout_marginRight="@dimen/_24sdp"
             android:layout_marginBottom="@dimen/_24sdp"
             android:backgroundTint="@color/icon_light"
-            android:contentDescription="@string/app_name"
             android:src="@drawable/ic_add"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:tint="@color/white" />
+            app:rippleColor="@color/icon_bg_light"
+            app:tint="@color/white"
+            tools:ignore="SpeakableTextPresentCheck" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
