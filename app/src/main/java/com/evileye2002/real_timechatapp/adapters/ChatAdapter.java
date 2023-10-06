@@ -1,5 +1,6 @@
 package com.evileye2002.real_timechatapp.adapters;
 
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -7,19 +8,14 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.evileye2002.real_timechatapp.databinding.ItemDateBinding;
+import com.evileye2002.real_timechatapp.R;
 import com.evileye2002.real_timechatapp.databinding.ItemReceivedMessageBinding;
 import com.evileye2002.real_timechatapp.databinding.ItemSendMessageBinding;
 import com.evileye2002.real_timechatapp.models.ChatMessage;
-import com.evileye2002.real_timechatapp.models.Conversation;
 import com.evileye2002.real_timechatapp.models.Members;
-import com.evileye2002.real_timechatapp.models.User;
-import com.evileye2002.real_timechatapp.utilities.Const;
 import com.evileye2002.real_timechatapp.utilities.Funct;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -31,6 +27,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     final int VIEW_TYPE_SENT = 1;
     final int VIEW_TYPE_RECEIVED = 2;
     final int VIEW_TYPE_DATE = 3;
+    Drawable bg_complete;
+    Drawable bg_unComplete;
 
     public ChatAdapter(List<ChatMessage> chatMessageList, String currentUserID,List<Members> memberList) {
         this.chatMessageList = chatMessageList;
@@ -40,7 +38,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         listDateFirst = new ArrayList<>();
         listTimeLast = new ArrayList<>();
 
-        for (ChatMessage chat : chatMessageList) {
+        /*for (ChatMessage chat : chatMessageList) {
             String dates = listDateFirst.toString();
             if (dates.contains(chat.timestamp.split("-")[0])) {
                 continue;
@@ -56,7 +54,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }
             listTimeLast.add(chat.timestamp);
         }
-        Collections.reverse(chatMessageList);
+        Collections.reverse(chatMessageList);*/
     }
 
     @NonNull
@@ -94,44 +92,18 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     //ViewHolder
-    class DateViewHolder extends RecyclerView.ViewHolder {
-        ItemDateBinding binding;
-
-        public DateViewHolder(ItemDateBinding binding) {
-            super(binding.getRoot());
-            this.binding = binding;
-        }
-
-        void setData(ChatMessage chat) {
-            /*String currentDate = Funct.dateToString(new Date(),"dd/MM/yyyy-HH:mm:ss");
-            String date = currentDate.split("-")[0];
-            String[] dates = date.split("/");
-            String time = currentDate.split("-")[1];
-
-            String finalTimestamp = "";
-            if(!currentDate.contains(dates[2])){
-                finalTimestamp = Funct.dateToString(Funct.stringToDate(chat.timestamp,"dd/MM/yyyy-HH:mm:ss"),"dd THG.MM, yyyy");
-            }
-            if(!currentDate.contains(dates[1] + "/" + dates[2])){
-                finalTimestamp = Funct.dateToString(Funct.stringToDate(chat.timestamp,"dd/MM/yyyy-HH:mm:ss"),"dd, TH.MM");
-            }
-            if(currentDate.contains())
-
-
-            binding.textDate.setText(finalTimestamp);*/
-        }
-    }
-
     class SendMessageViewHolder extends RecyclerView.ViewHolder {
         ItemSendMessageBinding binding;
 
         public SendMessageViewHolder(ItemSendMessageBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
+            bg_complete = binding.getRoot().getResources().getDrawable(R.drawable.bg_complete);
+            bg_unComplete = binding.getRoot().getResources().getDrawable(R.drawable.bg_un_complete);
         }
 
         void setData(ChatMessage chat) {
-            String dateF = setDateFilter(chat.timestamp);
+            /*String dateF = setDateFilter(chat.timestamp);
             if (dateF != null) {
                 binding.textDate.setText(dateF);
                 binding.layoutDate.setVisibility(View.VISIBLE);
@@ -141,6 +113,17 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             if (timeF != null) {
                 binding.textTime.setText(timeF);
                 binding.textTime.setVisibility(View.VISIBLE);
+            }*/
+            if(chat.status != null){
+                binding.status.setVisibility(View.VISIBLE);
+                if(chat.status.equals("pending"))
+                    binding.status.setBackgroundDrawable(bg_unComplete);
+                if(chat.status.equals("complete")){
+                    binding.status.setBackgroundDrawable(bg_complete);
+                    binding.status.setImageResource(R.drawable.ic_check);
+                    chat.status = "0";
+                }else if (chat.status.equals("0"))
+                    binding.status.setVisibility(View.GONE);
             }
             binding.textMessage.setText(chat.message);
         }
@@ -155,7 +138,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
 
         void setData(ChatMessage chat) {
-            String dateF = setDateFilter(chat.timestamp);
+            /*String dateF = setDateFilter(chat.timestamp);
             if (dateF != null) {
                 binding.textDate.setText(dateF);
                 binding.layoutDate.setVisibility(View.VISIBLE);
@@ -165,7 +148,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             if (timeF != null) {
                 binding.textTime.setText(timeF);
                 binding.textTime.setVisibility(View.VISIBLE);
-            }
+            }*/
             binding.textMessage.setText(chat.message);
 
             for (Members member : memberList){

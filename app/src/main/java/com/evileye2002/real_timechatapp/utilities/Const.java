@@ -9,6 +9,7 @@ public class Const {
     public static final FirebaseFirestore firestore = FirebaseFirestore.getInstance();
     public static final FirebaseMessaging firestoreMessaging = FirebaseMessaging.getInstance();
     public static final String PREFERENCE_NAME = "chatAppPreference";
+    public static final String dateFormat = "dd/MM/yyyy-HH:mm:ss";
 
     //Collections Key
     public static final String COLLECTION_USERS = "users";
@@ -58,6 +59,7 @@ public class Const {
     public static final String CHAT = "chat";
     public static final String MESSAGE = "message";
     public static final String TIMESTAMP = "timestamp";
+    public static final String PENDING_ID = "pendingID";
 
     //Document Conversations
     public static final String CONVERSATION = "conversation";

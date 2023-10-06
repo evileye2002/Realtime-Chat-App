@@ -9,6 +9,7 @@ import androidx.core.view.GravityCompat;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
@@ -19,8 +20,15 @@ import com.evileye2002.real_timechatapp.databinding.ActivityMainBinding;
 import com.evileye2002.real_timechatapp.utilities.Const;
 import com.evileye2002.real_timechatapp.utilities.Funct;
 import com.evileye2002.real_timechatapp.utilities.PreferenceManager;
+import com.evileye2002.real_timechatapp.utilities.Timestamp;
 import com.google.firebase.firestore.FieldValue;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import java.io.IOException;
 import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
@@ -28,17 +36,27 @@ public class MainActivity extends AppCompatActivity {
     PreferenceManager manager;
     String currentUserID;
     View navViewHeader;
+    String timestamp = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        test();
         init();
         setListener();
         getCurrentUserData();
         getToken();
         requestPermission();
+    }
+
+    void test() {
+        Timestamp getTimestamp = new Timestamp(result -> {
+            timestamp = result;
+            String a = timestamp;
+        });
+        getTimestamp.execute();
     }
 
     @Override
@@ -63,8 +81,7 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == 100) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
-            }
-            else
+            } else
                 Funct.showToast(getApplicationContext(), "Yêu cầu quyền truy cập vào bộ nhớ để tiếp tục");
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);

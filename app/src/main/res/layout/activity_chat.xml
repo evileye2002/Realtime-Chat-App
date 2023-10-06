@@ -4,20 +4,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white"
     tools:context=".activities.ChatActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layoutHeader"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="@dimen/_6sdp"
+        android:padding="@dimen/_4sdp"
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layoutImage"
-            android:layout_width="@dimen/_35sdp"
-            android:layout_height="@dimen/_35sdp"
-            android:layout_marginStart="@dimen/_6sdp"
+            android:layout_width="@dimen/_32sdp"
+            android:layout_height="@dimen/_32sdp"
+            android:layout_marginStart="@dimen/_4sdp"
             app:layout_constraintBottom_toBottomOf="@id/imageBack"
             app:layout_constraintStart_toEndOf="@id/imageBack"
             app:layout_constraintTop_toTopOf="@id/imageBack">
@@ -55,6 +56,7 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
+
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/imageBack"
             android:layout_width="@dimen/_45sdp"
@@ -79,7 +81,7 @@
             android:id="@+id/textName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/_6sdp"
+            android:layout_marginStart="@dimen/_15sdp"
             android:layout_marginEnd="@dimen/_6sdp"
             android:ellipsize="end"
             android:maxLines="1"
@@ -90,6 +92,17 @@
             app:layout_constraintEnd_toStartOf="@id/imageInfo"
             app:layout_constraintStart_toEndOf="@id/layoutImage"
             app:layout_constraintTop_toTopOf="@id/imageBack" />
+
+        <TextView
+            android:id="@+id/internetState"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/offline"
+            android:textColor="@color/error"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/imageBack" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

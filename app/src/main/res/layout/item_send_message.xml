@@ -62,4 +62,24 @@
             app:layout_constraintTop_toBottomOf="@id/textMessage" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_4sdp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/layoutMessage">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/status"
+            android:layout_width="@dimen/_10sdp"
+            android:layout_height="@dimen/_10sdp"
+            android:layout_gravity="end"
+            android:padding="@dimen/_1sdp"
+            android:background="@drawable/bg_un_complete"
+            android:src="@drawable/ic_check"
+            android:visibility="gone"
+            android:tint="@color/white"/>
+
+    </FrameLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

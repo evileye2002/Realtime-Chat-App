@@ -25,4 +25,5 @@
     <string name="search">Tìm kiếm</string>
     <string name="add_friend">Thêm bạn</string>
     <string name="input_chat">Nhập tin nhắn...</string>
+    <string name="offline">Không có kết nối internet</string>
 </resources>

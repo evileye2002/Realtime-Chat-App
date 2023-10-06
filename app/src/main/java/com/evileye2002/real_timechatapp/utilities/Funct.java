@@ -11,16 +11,21 @@ import android.widget.Toast;
 
 import com.evileye2002.real_timechatapp.listeners.EditTextListener;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.type.DateTime;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.util.Date;
 import java.util.Locale;
 
 public class Funct {
+
     public static void showToast(Context context, String message) {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
     }
