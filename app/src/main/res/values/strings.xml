@@ -26,4 +26,7 @@
     <string name="add_friend">Thêm bạn</string>
     <string name="input_chat">Nhập tin nhắn...</string>
     <string name="offline">Không có kết nối internet</string>
+    <string name="copy">Sao chép</string>
+    <string name="delete_msg">Xóa tin nhắn</string>
+    <string name="resend">Gửi lại</string>
 </resources>

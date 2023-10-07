@@ -1,12 +1,19 @@
 package com.evileye2002.real_timechatapp.activities;
 
+import android.app.Dialog;
+import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.os.Bundle;
+import android.view.Gravity;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.LinearLayout;
+
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-
+import com.evileye2002.real_timechatapp.R;
 import com.evileye2002.real_timechatapp.adapters.ChatAdapter;
 import com.evileye2002.real_timechatapp.databinding.ActivityChatBinding;
 import com.evileye2002.real_timechatapp.models.ChatMessage;
@@ -18,15 +25,12 @@ import com.evileye2002.real_timechatapp.utilities.Funct;
 import com.evileye2002.real_timechatapp.utilities.PreferenceManager;
 import com.evileye2002.real_timechatapp.utilities.Timestamp;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.common.reflect.TypeToken;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.gson.Gson;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -35,13 +39,13 @@ import java.util.List;
 public class ChatActivity extends AppCompatActivity {
     ActivityChatBinding binding;
     PreferenceManager manager;
-    String currentUserID;
+    String currentUserID, currentConID;
     User receiverUser;
     Conversation currentCon;
-    String currentConID;
     List<ChatMessage> mainMessageList;
     List<ChatMessage> pendingList;
     List<Members> memberList;
+    List<String> countList;
     ChatAdapter adapter;
 
     @Override
@@ -71,6 +75,8 @@ public class ChatActivity extends AppCompatActivity {
         mainMessageList = new ArrayList<>();
         pendingList = new ArrayList<>();
         memberList = new ArrayList<>();
+        countList = new ArrayList<>();
+
     }
 
     void setListener() {
@@ -86,6 +92,43 @@ public class ChatActivity extends AppCompatActivity {
             binding.recyclerView.setVisibility(View.VISIBLE);
             binding.processBar.setVisibility(View.INVISIBLE);
         }
+    }
+
+    void resendMessage(ChatMessage chat) {
+        if (chat.message.isEmpty())
+            return;
+        //String pendingID = Integer.toString(mainMessageList.size() + 1);
+        String pendingID = Integer.toString(countList.size() + 1);
+        String msg = chat.message;
+        pendingList.remove(chat);
+        mainMessageList.remove(chat);
+        pendingSend(pendingID, msg);
+
+        Timestamp getTimestamp = new Timestamp(result -> {
+            if (result.equals("")) {
+                if (binding.internetState.getVisibility() != View.VISIBLE)
+                    binding.internetState.setVisibility(View.VISIBLE);
+                return;
+            }
+            if (binding.internetState.getVisibility() != View.GONE)
+                binding.internetState.setVisibility(View.GONE);
+            HashMap<String, Object> message = new HashMap<>();
+            message.put(Const.SENDER_ID, currentUserID);
+            message.put(Const.MESSAGE, msg);
+            message.put(Const.TIMESTAMP, result);
+            message.put(Const.PENDING_ID, pendingID);
+
+            if (currentConID.equals("")) {
+                addConversation(msg, result, message);
+            } else {
+                Const.chat_collection(currentConID).add(message).addOnCompleteListener(task -> {
+                    boolean isValid = task.isSuccessful() && task.getResult() != null;
+                    if (isValid)
+                        updateConversation(msg, result);
+                });
+            }
+        });
+        getTimestamp.execute();
     }
 
     void sendMessage() {
@@ -113,20 +156,20 @@ public class ChatActivity extends AppCompatActivity {
         String lastTimestamp2 = listPending.get(listPending.size() - 1).timestamp;
         String lastTimestamp3 = listPending.get(listPending.size() - 2).timestamp;*/
 
-        String pendingID = Integer.toString(mainMessageList.size() + 1);
+        String pendingID = Integer.toString(countList.size() + 1);
         String msg = binding.inputMessage.getText().toString();
-        pendingSend(pendingID);
+        pendingSend(pendingID, msg);
 
         Timestamp getTimestamp = new Timestamp(result -> {
             String timestamp = result;
-            
-            if(timestamp.equals("")){
-                if(binding.internetState.getVisibility() != View.VISIBLE)
+
+            if (timestamp.equals("")) {
+                if (binding.internetState.getVisibility() != View.VISIBLE)
                     binding.internetState.setVisibility(View.VISIBLE);
                 return;
             }
 
-            if(binding.internetState.getVisibility() != View.GONE)
+            if (binding.internetState.getVisibility() != View.GONE)
                 binding.internetState.setVisibility(View.GONE);
             HashMap<String, Object> message = new HashMap<>();
             message.put(Const.SENDER_ID, currentUserID);
@@ -147,16 +190,17 @@ public class ChatActivity extends AppCompatActivity {
         getTimestamp.execute();
     }
 
-    void pendingSend(String pendingID) {
+    void pendingSend(String pendingID, String msg) {
         ChatMessage pendingChat = new ChatMessage();
         pendingChat.pendingID = pendingID;
         pendingChat.timestamp = Funct.dateToString(new Date(), Const.dateFormat);
-        pendingChat.message = binding.inputMessage.getText().toString();
+        pendingChat.message = msg;
         pendingChat.senderID = currentUserID;
         pendingChat.status = "pending";
 
         pendingList.add(pendingChat);
         mainMessageList.add(pendingChat);
+        countList.add(pendingChat.pendingID);
         updateChat();
         binding.inputMessage.setText(null);
     }
@@ -260,26 +304,15 @@ public class ChatActivity extends AppCompatActivity {
             loading(false);
             for (DocumentChange documentChange : value.getDocumentChanges()) {
                 ChatMessage newChat = documentChange.getDocument().toObject(ChatMessage.class);
-                /*if (documentChange.getType() == DocumentChange.Type.ADDED) {
-                    ChatMessage chat = documentChange.getDocument().toObject(ChatMessage.class);
-                    chatMessageList.add(chat);
-                }*/
-                if(documentChange.getType() == DocumentChange.Type.REMOVED){
+                countList.add(newChat.pendingID);
+                if(newChat.senderID.equals(currentUserID))
+                    newChat.id = documentChange.getDocument().getId();
+                if (documentChange.getType() == DocumentChange.Type.REMOVED) {
                     mainMessageList.removeIf(chatMain -> chatMain.pendingID.equals(newChat.pendingID));
                     updateChat();
                     return;
                 }
-                if(documentChange.getType() == DocumentChange.Type.MODIFIED){
-                    for (ChatMessage chatMain : mainMessageList){
-                        if(chatMain.pendingID.equals(newChat.pendingID)){
-                            mainMessageList.set(mainMessageList.indexOf(chatMain),newChat);
-                            break;
-                        }
-                    }
-                    updateChat();
-                    return;
-                }
-                if(documentChange.getType() == DocumentChange.Type.ADDED){
+                if (documentChange.getType() == DocumentChange.Type.ADDED) {
                     /*if(!newChat.senderID.equals(currentUserID) && mainMessageList.size() > 0){
                         mainMessageList.add(newChat);
                         mainMessageList.sort(Comparator.comparing(o -> o.timestamp));
@@ -288,19 +321,19 @@ public class ChatActivity extends AppCompatActivity {
                         binding.recyclerView.smoothScrollToPosition(mainMessageList.size() - 1);
                         return;
                     }*/
-
-                    if (pendingList.size() > 0) {
-                        mainMessageList.forEach(chatMain -> {
-                            if(chatMain.status != null){
-                                if (chatMain.pendingID.equals(newChat.pendingID) && !chatMain.status.equals("complete")) {
-                                    pendingList.removeIf(pendingChat -> chatMain.pendingID.equals(pendingChat.pendingID));
-                                    chatMain.timestamp = newChat.timestamp;
-                                    chatMain.status = "complete";
-                                    chatMain.pendingID = "";
-                                    updateChat();
+                    if (newChat.senderID.equals(currentUserID)){
+                        if (pendingList.size() > 0) {
+                            mainMessageList.forEach(chatMain -> {
+                                if (chatMain.status != null) {
+                                    if (chatMain.pendingID.equals(newChat.pendingID) && !chatMain.status.equals("complete")) {
+                                        pendingList.removeIf(pendingChat -> chatMain.pendingID.equals(pendingChat.pendingID));
+                                        chatMain.timestamp = newChat.timestamp;
+                                        chatMain.status = "complete";
+                                        chatMain.pendingID = "";
+                                        updateChat();
+                                    }
                                 }
-                            }
-                        });
+                            });
                         /*for (ChatMessage pendingChat : mainMessageList) {
                             if (pendingChat.pendingID.equals(""))
                                 continue;
@@ -318,9 +351,26 @@ public class ChatActivity extends AppCompatActivity {
                                 binding.recyclerView.smoothScrollToPosition(mainMessageList.size() - 1);
                             }
                         }*/
-                        return;
+                            return;
+                        }
                     }
                     mainMessageList.add(newChat);
+                }
+                if (newChat.senderID.equals(currentUserID)) {
+                    /*if (documentChange.getType() == DocumentChange.Type.ADDED) {
+                    ChatMessage chat = documentChange.getDocument().toObject(ChatMessage.class);
+                    chatMessageList.add(chat);
+                }*/
+                    if (documentChange.getType() == DocumentChange.Type.MODIFIED) {
+                        for (ChatMessage chatMain : mainMessageList) {
+                            if (chatMain.pendingID.equals(newChat.pendingID)) {
+                                mainMessageList.set(mainMessageList.indexOf(chatMain), newChat);
+                                break;
+                            }
+                        }
+                        updateChat();
+                        return;
+                    }
                 }
             }
             if (mainMessageList.size() > 0) {
@@ -329,9 +379,51 @@ public class ChatActivity extends AppCompatActivity {
         }
     };
 
-    void updateChat(){
-        adapter = new ChatAdapter(mainMessageList, currentUserID, memberList);
+    void updateChat() {
+        adapter = new ChatAdapter(mainMessageList, currentUserID, memberList, this::showDialog);
         binding.recyclerView.setAdapter(adapter);
-        binding.recyclerView.smoothScrollToPosition(mainMessageList.size() - 1);
+        //binding.recyclerView.smoothScrollToPosition(mainMessageList.size() - 1);
+    }
+
+    void showDialog(ChatMessage chat) {
+        final Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.bottom_sheet_dialog);
+
+        LinearLayout copy = dialog.findViewById(R.id.layoutCopy);
+        LinearLayout resend = dialog.findViewById(R.id.layoutResend);
+        LinearLayout delete = dialog.findViewById(R.id.layoutDelete);
+
+        if (chat.status != null)
+            if (chat.status.equals("pending"))
+                resend.setVisibility(View.VISIBLE);
+        if (!chat.senderID.equals(currentUserID))
+            delete.setVisibility(View.GONE);
+
+        copy.setOnClickListener(v -> {
+            String msg = chat.message;
+            dialog.dismiss();
+        });
+        resend.setOnClickListener(v -> {
+            resendMessage(chat);
+            dialog.dismiss();
+        });
+        delete.setOnClickListener(v -> {
+            if(chat.status == null && chat.id != null){
+                Const.chatDoc(currentConID,chat.id).delete();
+            }
+            if (chat.status != null)
+                if (chat.status.equals("pending")) {
+                    mainMessageList.remove(chat);
+                    updateChat();
+                }
+            dialog.dismiss();
+        });
+
+        dialog.show();
+        dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+        dialog.getWindow().setGravity(Gravity.BOTTOM);
     }
 }

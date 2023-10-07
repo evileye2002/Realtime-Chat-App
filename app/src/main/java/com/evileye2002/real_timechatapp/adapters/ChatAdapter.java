@@ -4,6 +4,7 @@ import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.PopupMenu;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -11,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.evileye2002.real_timechatapp.R;
 import com.evileye2002.real_timechatapp.databinding.ItemReceivedMessageBinding;
 import com.evileye2002.real_timechatapp.databinding.ItemSendMessageBinding;
+import com.evileye2002.real_timechatapp.listeners.ChatListener;
 import com.evileye2002.real_timechatapp.models.ChatMessage;
 import com.evileye2002.real_timechatapp.models.Members;
 import com.evileye2002.real_timechatapp.utilities.Funct;
@@ -23,6 +25,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     List<String> listDateFirst;
     List<String> listTimeLast;
     List<Members> memberList;
+    ChatListener listener;
     final String currentUserID;
     final int VIEW_TYPE_SENT = 1;
     final int VIEW_TYPE_RECEIVED = 2;
@@ -30,10 +33,11 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     Drawable bg_complete;
     Drawable bg_unComplete;
 
-    public ChatAdapter(List<ChatMessage> chatMessageList, String currentUserID,List<Members> memberList) {
+    public ChatAdapter(List<ChatMessage> chatMessageList, String currentUserID, List<Members> memberList,ChatListener listener) {
         this.chatMessageList = chatMessageList;
         this.currentUserID = currentUserID;
         this.memberList = memberList;
+        this.listener = listener;
 
         listDateFirst = new ArrayList<>();
         listTimeLast = new ArrayList<>();
@@ -114,18 +118,22 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 binding.textTime.setText(timeF);
                 binding.textTime.setVisibility(View.VISIBLE);
             }*/
-            if(chat.status != null){
+            if (chat.status != null) {
                 binding.status.setVisibility(View.VISIBLE);
-                if(chat.status.equals("pending"))
+                if (chat.status.equals("pending"))
                     binding.status.setBackgroundDrawable(bg_unComplete);
-                if(chat.status.equals("complete")){
+                if (chat.status.equals("complete")) {
                     binding.status.setBackgroundDrawable(bg_complete);
                     binding.status.setImageResource(R.drawable.ic_check);
                     chat.status = "0";
-                }else if (chat.status.equals("0"))
+                } else if (chat.status.equals("0"))
                     binding.status.setVisibility(View.GONE);
             }
             binding.textMessage.setText(chat.message);
+            binding.getRoot().setOnLongClickListener(v -> {
+                listener.onLongClick(chat);
+                return true;
+            });
         }
     }
 
@@ -150,11 +158,15 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 binding.textTime.setVisibility(View.VISIBLE);
             }*/
             binding.textMessage.setText(chat.message);
+            binding.getRoot().setOnLongClickListener(v -> {
+                listener.onLongClick(chat);
+                return true;
+            });
 
-            for (Members member : memberList){
-                if(member.id.equals(currentUserID))
+            for (Members member : memberList) {
+                if (member.id.equals(currentUserID))
                     continue;
-                if(member.id.equals(chat.senderID)){
+                if (member.id.equals(chat.senderID)) {
                     binding.imageProfile.setImageBitmap(Funct.stringToBitmap(member.image));
                     break;
                 }
