@@ -17,10 +17,11 @@ import android.widget.TextView;
 
 import com.evileye2002.real_timechatapp.R;
 import com.evileye2002.real_timechatapp.databinding.ActivityMainBinding;
-import com.evileye2002.real_timechatapp.utilities.Const;
-import com.evileye2002.real_timechatapp.utilities.Funct;
 import com.evileye2002.real_timechatapp.utilities.PreferenceManager;
 import com.evileye2002.real_timechatapp.utilities.Timestamp;
+import com.evileye2002.real_timechatapp.utilities._const;
+import com.evileye2002.real_timechatapp.utilities._firestore;
+import com.evileye2002.real_timechatapp.utilities._funct;
 import com.google.firebase.firestore.FieldValue;
 
 import org.jsoup.Jsoup;
@@ -82,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
             } else
-                Funct.showToast(getApplicationContext(), "Yêu cầu quyền truy cập vào bộ nhớ để tiếp tục");
+                _funct.showToast(getApplicationContext(), "Yêu cầu quyền truy cập vào bộ nhớ để tiếp tục");
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
@@ -91,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
         manager = new PreferenceManager(getApplicationContext());
         binding.navView.bringToFront();
         navViewHeader = binding.navView.getHeaderView(0);
-        currentUserID = manager.getString(Const.ID);
+        currentUserID = manager.getString(_const.ID);
     }
 
     void setListener() {
@@ -122,8 +123,8 @@ public class MainActivity extends AppCompatActivity {
 
     void signOut() {
         HashMap<String, Object> updates = new HashMap<>();
-        updates.put(Const.TOKEN, FieldValue.delete());
-        Const.userDoc(currentUserID).update(updates)
+        updates.put(_const.TOKEN, FieldValue.delete());
+        _firestore.singleCon(currentUserID).update(updates)
                 .addOnSuccessListener(unused -> {
                     manager.clear();
                     Intent intent = new Intent(getApplicationContext(), SignInActivity.class);
@@ -135,12 +136,12 @@ public class MainActivity extends AppCompatActivity {
     void getCurrentUserData() {
         TextView textName = navViewHeader.findViewById(R.id.textName);
         ImageView imageProfile = navViewHeader.findViewById(R.id.imageProfile);
-        textName.setText(manager.getString(Const.NAME));
-        imageProfile.setImageBitmap(Funct.stringToBitmap(manager.getString(Const.IMAGE)));
+        textName.setText(manager.getString(_const.NAME));
+        imageProfile.setImageBitmap(_funct.stringToBitmap(manager.getString(_const.IMAGE)));
     }
 
     void getToken() {
-        Const.firestoreMessaging.getToken()
+        _const.firestoreMessaging.getToken()
                 .addOnSuccessListener(this::updateToken)
                 .addOnFailureListener(e -> {
 
@@ -148,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void updateToken(String token) {
-        Const.userDoc(currentUserID).update(Const.TOKEN, token)
+        _firestore.singleUser(currentUserID).update(_const.TOKEN, token)
                 .addOnFailureListener(e -> {
 
                 });

@@ -10,8 +10,9 @@ import com.evileye2002.real_timechatapp.databinding.ItemConversationBinding;
 import com.evileye2002.real_timechatapp.listeners.ConversationListener;
 import com.evileye2002.real_timechatapp.models.Conversation;
 import com.evileye2002.real_timechatapp.models.User;
-import com.evileye2002.real_timechatapp.utilities.Const;
-import com.evileye2002.real_timechatapp.utilities.Funct;
+import com.evileye2002.real_timechatapp.utilities._const;
+import com.evileye2002.real_timechatapp.utilities._firestore;
+import com.evileye2002.real_timechatapp.utilities._funct;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,16 +57,16 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
 
         void setData(Conversation conversation) {
             if (conversation.isGroup) {
-                binding.imageConversation.setImageBitmap(Funct.stringToBitmap(conversation.image));
+                binding.imageConversation.setImageBitmap(_funct.stringToBitmap(conversation.image));
                 binding.textName.setText(conversation.name);
                 binding.getRoot().setOnClickListener(v -> conversationListener.onItemClick(conversation, null));
             } else {
-                List<String> member = new ArrayList<>(Arrays.asList(conversation.members.split(",")));
+                List<String> member = conversation.memberList;
                 member.remove(currentUserID);
-                Const.userDoc(member.get(0)).get().addOnCompleteListener(task -> {
+                _firestore.singleUser(member.get(0)).get().addOnCompleteListener(task -> {
                     User user = task.getResult().toObject(User.class);
                     user.id = task.getResult().getId();
-                    binding.imageConversation.setImageBitmap(Funct.stringToBitmap(user.image));
+                    binding.imageConversation.setImageBitmap(_funct.stringToBitmap(user.image));
                     binding.textName.setText(user.name);
                     binding.getRoot().setOnClickListener(v -> conversationListener.onItemClick(null, user));
                 });

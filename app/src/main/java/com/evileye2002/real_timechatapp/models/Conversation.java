@@ -6,11 +6,9 @@ import java.util.List;
 public class Conversation implements Serializable {
     public String id, lastSenderID, lastSenderName, lastMessage, lastTimestamp;
     public boolean isGroup;
-    //Group
-    public String senderID, senderName, senderImage,receiverID, receiverName, receiverImage;
 
-    //Group
-    public String name, image, members;
+    public String name, image;
+    public List<String> memberList;
 
-    public List<Members> memberList;
+    public List<Members> membersDetails;
 }

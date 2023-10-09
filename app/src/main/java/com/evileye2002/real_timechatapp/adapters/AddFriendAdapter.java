@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.evileye2002.real_timechatapp.databinding.ItemAddFriendBinding;
 import com.evileye2002.real_timechatapp.listeners.UserListener;
 import com.evileye2002.real_timechatapp.models.User;
-import com.evileye2002.real_timechatapp.utilities.Funct;
+import com.evileye2002.real_timechatapp.utilities._funct;
 
 import java.util.List;
 
@@ -50,7 +50,7 @@ public class AddFriendAdapter extends RecyclerView.Adapter<AddFriendAdapter.AddF
         }
 
         void setData(User user){
-            binding.imageProfile.setImageBitmap(Funct.stringToBitmap(user.image));
+            binding.imageProfile.setImageBitmap(_funct.stringToBitmap(user.image));
             binding.textName.setText(user.name);
             binding.imageAdd.setOnClickListener(v -> {
                 userListener.onItemClick(user);

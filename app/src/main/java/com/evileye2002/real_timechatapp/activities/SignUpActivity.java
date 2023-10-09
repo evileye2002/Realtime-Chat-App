@@ -21,9 +21,10 @@ import android.view.WindowManager;
 
 import com.evileye2002.real_timechatapp.R;
 import com.evileye2002.real_timechatapp.databinding.ActivitySignUpBinding;
-import com.evileye2002.real_timechatapp.utilities.Const;
-import com.evileye2002.real_timechatapp.utilities.Funct;
 import com.evileye2002.real_timechatapp.utilities.PreferenceManager;
+import com.evileye2002.real_timechatapp.utilities._const;
+import com.evileye2002.real_timechatapp.utilities._firestore;
+import com.evileye2002.real_timechatapp.utilities._funct;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -63,10 +64,10 @@ public class SignUpActivity extends AppCompatActivity {
             requestPermission();
         });
 
-        Funct.onTextChange(binding.inputName, binding.layoutName, this::onTextChange);
-        Funct.onTextChange(binding.inputPassword, binding.layoutPassword, this::onTextChange);
-        Funct.onTextChange(binding.inputConfirmPassword, binding.layoutConfirmPassword, this::onTextChange);
-        Funct.onTextChange(binding.inputEmail, binding.layoutEmail, (s, textInputLayout) -> {
+        _funct.onTextChange(binding.inputName, binding.layoutName, this::onTextChange);
+        _funct.onTextChange(binding.inputPassword, binding.layoutPassword, this::onTextChange);
+        _funct.onTextChange(binding.inputConfirmPassword, binding.layoutConfirmPassword, this::onTextChange);
+        _funct.onTextChange(binding.inputEmail, binding.layoutEmail, (s, textInputLayout) -> {
             if (s.toString().isEmpty())
                 return;
 
@@ -78,9 +79,9 @@ public class SignUpActivity extends AppCompatActivity {
             }
 
             //Check Email Exist
-            Const.firestore
-                    .collection(Const.COLLECTION_USERS)
-                    .whereEqualTo(Const.EMAIL, s.toString().trim().toLowerCase())
+            _const.firestore
+                    .collection(_const.COLLECTION_USERS)
+                    .whereEqualTo(_const.EMAIL, s.toString().trim().toLowerCase())
                     .get()
                     .addOnCompleteListener(task -> {
                         boolean isExist = task.isSuccessful() && task.getResult() != null && task.getResult().getDocuments().size() > 0;
@@ -116,12 +117,12 @@ public class SignUpActivity extends AppCompatActivity {
         loading(true);
         FirebaseFirestore database = FirebaseFirestore.getInstance();
         HashMap<String, Object> user = new HashMap<>();
-        user.put(Const.NAME, binding.inputName.getText().toString());
-        user.put(Const.EMAIL, binding.inputEmail.getText().toString());
-        user.put(Const.PASSWORD, binding.inputPassword.getText().toString());
-        user.put(Const.IMAGE, encodedImage);
+        user.put(_const.NAME, binding.inputName.getText().toString());
+        user.put(_const.EMAIL, binding.inputEmail.getText().toString());
+        user.put(_const.PASSWORD, binding.inputPassword.getText().toString());
+        user.put(_const.IMAGE, encodedImage);
 
-        Const.user_collection.add(user).addOnSuccessListener(documentReference -> {
+        _firestore.allUsers().add(user).addOnSuccessListener(documentReference -> {
             loading(false);
             onBackPressed();
         });
@@ -156,7 +157,7 @@ public class SignUpActivity extends AppCompatActivity {
     Boolean isValidUserDetails() {
         addEmptyError();
         if (encodedImage == null) {
-            Funct.showToast(getApplicationContext(), "Chưa chọn ảnh!");
+            _funct.showToast(getApplicationContext(), "Chưa chọn ảnh!");
             return false;
         }
         if (binding.inputName.getText().toString().trim().isEmpty())

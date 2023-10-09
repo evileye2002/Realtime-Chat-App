@@ -4,18 +4,18 @@ import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.PopupMenu;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.evileye2002.real_timechatapp.R;
+import com.evileye2002.real_timechatapp.databinding.ItemChatBinding;
 import com.evileye2002.real_timechatapp.databinding.ItemReceivedMessageBinding;
 import com.evileye2002.real_timechatapp.databinding.ItemSendMessageBinding;
 import com.evileye2002.real_timechatapp.listeners.ChatListener;
 import com.evileye2002.real_timechatapp.models.ChatMessage;
 import com.evileye2002.real_timechatapp.models.Members;
-import com.evileye2002.real_timechatapp.utilities.Funct;
+import com.evileye2002.real_timechatapp.utilities._funct;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,13 +27,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     List<Members> memberList;
     ChatListener listener;
     final String currentUserID;
-    final int VIEW_TYPE_SENT = 1;
-    final int VIEW_TYPE_RECEIVED = 2;
-    final int VIEW_TYPE_DATE = 3;
     Drawable bg_complete;
     Drawable bg_unComplete;
 
-    public ChatAdapter(List<ChatMessage> chatMessageList, String currentUserID, List<Members> memberList,ChatListener listener) {
+    public ChatAdapter(List<ChatMessage> chatMessageList, String currentUserID, List<Members> memberList, ChatListener listener) {
         this.chatMessageList = chatMessageList;
         this.currentUserID = currentUserID;
         this.memberList = memberList;
@@ -64,22 +61,24 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        if (viewType == VIEW_TYPE_SENT)
+        /*if (viewType == VIEW_TYPE_SENT)
             return new SendMessageViewHolder(
                     ItemSendMessageBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false)
             );
         else
             return new ReceivedMessageViewHolder(
                     ItemReceivedMessageBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false)
-            );
+            );*/
+        return new ChatViewHolder(ItemChatBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        if (getItemViewType(position) == VIEW_TYPE_SENT)
+        /*if (getItemViewType(position) == VIEW_TYPE_SENT)
             ((SendMessageViewHolder) holder).setData(chatMessageList.get(position));
         else
-            ((ReceivedMessageViewHolder) holder).setData(chatMessageList.get(position));
+            ((ReceivedMessageViewHolder) holder).setData(chatMessageList.get(position));*/
+        ((ChatViewHolder) holder).setData(chatMessageList.get(position));
     }
 
     @Override
@@ -89,13 +88,63 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public int getItemViewType(int position) {
-        if (chatMessageList.get(position).senderID.equals(currentUserID))
+       /* if (chatMessageList.get(position).senderID.equals(currentUserID))
             return VIEW_TYPE_SENT;
         else
-            return VIEW_TYPE_RECEIVED;
+            return VIEW_TYPE_RECEIVED;*/
+        return 0;
     }
 
     //ViewHolder
+    class ChatViewHolder extends RecyclerView.ViewHolder {
+        ItemChatBinding binding;
+
+        public ChatViewHolder(ItemChatBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
+            bg_complete = binding.getRoot().getResources().getDrawable(R.drawable.bg_complete);
+            bg_unComplete = binding.getRoot().getResources().getDrawable(R.drawable.bg_un_complete);
+        }
+
+        void setData(ChatMessage chat) {
+            if (chat.senderID.equals(currentUserID)){
+                if (chat.status != null) {
+                    binding.status.setVisibility(View.VISIBLE);
+                    if (chat.status.equals("pending"))
+                        binding.status.setBackgroundDrawable(bg_unComplete);
+                    if (chat.status.equals("complete")) {
+                        binding.status.setBackgroundDrawable(bg_complete);
+                        binding.status.setImageResource(R.drawable.ic_check);
+                        chat.status = "0";
+                    } else if (chat.status.equals("0"))
+                        binding.status.setVisibility(View.GONE);
+                }
+                binding.textSender.setText(chat.message);
+                binding.getRoot().setOnLongClickListener(v -> {
+                    listener.onLongClick(chat);
+                    return true;
+                });
+                return;
+            }
+
+            //Receiver
+            binding.textReceiver.setText(chat.message);
+            binding.getRoot().setOnLongClickListener(v -> {
+                listener.onLongClick(chat);
+                return true;
+            });
+
+            for (Members member : memberList) {
+                if (member.id.equals(currentUserID))
+                    continue;
+                if (member.id.equals(chat.senderID)) {
+                    binding.imageProfile.setImageBitmap(_funct.stringToBitmap(member.image));
+                    break;
+                }
+            }
+        }
+    }
+
     class SendMessageViewHolder extends RecyclerView.ViewHolder {
         ItemSendMessageBinding binding;
 
@@ -167,7 +216,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 if (member.id.equals(currentUserID))
                     continue;
                 if (member.id.equals(chat.senderID)) {
-                    binding.imageProfile.setImageBitmap(Funct.stringToBitmap(member.image));
+                    binding.imageProfile.setImageBitmap(_funct.stringToBitmap(member.image));
                     break;
                 }
             }
@@ -184,7 +233,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     String setDateFilter(String chatDateTime) {
         for (String date : listDateFirst) {
             if (chatDateTime.equals(date)) {
-                String dateF = Funct.dateToString(Funct.stringToDate(date, "dd/MM/yyyy"), "dd/MM, yyyy");
+                String dateF = _funct.dateToString(_funct.stringToDate(date, "dd/MM/yyyy"), "dd/MM, yyyy");
                 listDateFirst.remove(date);
                 return dateF;
             }
@@ -195,7 +244,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     String setTimeFilter(String chatDateTime) {
         for (String time : listTimeLast) {
             if (chatDateTime.equals(time)) {
-                String timeF = Funct.dateToString(Funct.stringToDate(time, "dd/MM/yyyy-HH:mm:ss"), "HH:mm");
+                String timeF = _funct.dateToString(_funct.stringToDate(time, "dd/MM/yyyy-HH:mm:ss"), "HH:mm");
                 listTimeLast.remove(time);
                 return timeF;
             }

@@ -10,8 +10,9 @@ import android.view.View;
 import com.evileye2002.real_timechatapp.adapters.AddFriendAdapter;
 import com.evileye2002.real_timechatapp.databinding.ActivityAddFriendBinding;
 import com.evileye2002.real_timechatapp.models.User;
-import com.evileye2002.real_timechatapp.utilities.Const;
+import com.evileye2002.real_timechatapp.utilities._const;
 import com.evileye2002.real_timechatapp.utilities.PreferenceManager;
+import com.evileye2002.real_timechatapp.utilities._firestore;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -21,7 +22,6 @@ import java.util.List;
 public class AddFriendActivity extends AppCompatActivity {
     ActivityAddFriendBinding binding;
     PreferenceManager manager;
-    DocumentReference currentUser;
     String currentUserID;
 
     @Override
@@ -40,8 +40,7 @@ public class AddFriendActivity extends AppCompatActivity {
 
     void init() {
         manager = new PreferenceManager(getApplicationContext());
-        currentUserID = manager.getString(Const.ID);
-        currentUser = Const.userDoc(currentUserID);
+        currentUserID = manager.getString(_const.ID);
         loading(false);
     }
 
@@ -85,7 +84,7 @@ public class AddFriendActivity extends AppCompatActivity {
 
     void getUsers(String s) {
         loading(true);
-        Const.user_collection.get().addOnCompleteListener(task -> {
+        _firestore.allUsers().get().addOnCompleteListener(task -> {
             loading(false);
             List<User> userList = new ArrayList<>();
             boolean isExist = task.isSuccessful() && task.getResult() != null && task.getResult().getDocuments().size() > 0;
@@ -95,12 +94,12 @@ public class AddFriendActivity extends AppCompatActivity {
                         continue;
                     }
 
-                    if (snapshot.getString(Const.FRIENDS) != null) {
-                        if (snapshot.getString(Const.FRIENDS).contains(currentUserID))
+                    if (snapshot.getString(_const.FRIEND_LIST) != null) {
+                        if (snapshot.getString(_const.FRIEND_LIST).contains(currentUserID))
                             continue;
                     }
 
-                    if (snapshot.getString(Const.NAME).contains(s)) {
+                    if (snapshot.getString(_const.NAME).contains(s)) {
                         User user = snapshot.toObject(User.class);
                         user.id = snapshot.getId();
                         userList.add(user);
@@ -111,12 +110,16 @@ public class AddFriendActivity extends AppCompatActivity {
                         //Request add friend
                         //Delete user from list
 
-                        String userFriends = user.friends != null ? user.friends : "";
-                        Const.user_collection.document(user.id).update(Const.FRIENDS, userFriends + currentUserID + ",");
+                        //String userFriends = user.friendList != null ? user.friendList : "";
+                        List<String> userFriends = user.friendList != null ? user.friendList : new ArrayList<>();
+                        userFriends.add(currentUserID);
+                        _firestore.singleUser(user.id).update(_const.FRIEND_LIST, userFriends);
 
-                        currentUser.get().addOnCompleteListener(task1 -> {
-                            String currentUserFriends = task1.getResult().getString(Const.FRIENDS) != null ? task1.getResult().getString(Const.FRIENDS) : "";
-                            currentUser.update(Const.FRIENDS, currentUserFriends + user.id + ",");
+                        _firestore.singleUser(currentUserID).get().addOnCompleteListener(task1 -> {
+                            User currentUser = task1.getResult().toObject(User.class);
+                            List<String> currentUserFriends = currentUser.friendList != null ? currentUser.friendList : new ArrayList<>();
+                            currentUserFriends.add(user.id);
+                            _firestore.singleUser(currentUserID).update(_const.FRIEND_LIST, currentUserFriends);
                         });
                     });
                     binding.recyclerView.setAdapter(adapter);

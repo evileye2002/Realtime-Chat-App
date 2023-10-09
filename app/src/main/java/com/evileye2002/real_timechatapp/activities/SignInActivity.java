@@ -10,9 +10,9 @@ import android.view.WindowManager;
 
 import com.evileye2002.real_timechatapp.R;
 import com.evileye2002.real_timechatapp.databinding.ActivitySignInBinding;
-import com.evileye2002.real_timechatapp.utilities.Const;
-import com.evileye2002.real_timechatapp.utilities.Funct;
 import com.evileye2002.real_timechatapp.utilities.PreferenceManager;
+import com.evileye2002.real_timechatapp.utilities._const;
+import com.evileye2002.real_timechatapp.utilities._funct;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.DocumentSnapshot;
 
@@ -25,7 +25,7 @@ public class SignInActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         preferenceManager = new PreferenceManager(getApplicationContext());
-        if (preferenceManager.getBoolean(Const.IS_SIGNED_IN)) {
+        if (preferenceManager.getBoolean(_const.IS_SIGNED_IN)) {
             startActivity(new Intent(getApplicationContext(), MainActivity.class));
             finish();
         }
@@ -41,8 +41,8 @@ public class SignInActivity extends AppCompatActivity {
                 signIn();
         });
 
-        Funct.onTextChange(binding.inputEmail, binding.layoutEmail, this::onTextChange);
-        Funct.onTextChange(binding.inputPassword, binding.layoutPassword, this::onTextChange);
+        _funct.onTextChange(binding.inputEmail, binding.layoutEmail, this::onTextChange);
+        _funct.onTextChange(binding.inputPassword, binding.layoutPassword, this::onTextChange);
     }
 
     void onTextChange(CharSequence s, TextInputLayout textInputLayout) {
@@ -64,10 +64,10 @@ public class SignInActivity extends AppCompatActivity {
 
     void signIn() {
         loading(true);
-        Const.firestore
-                .collection(Const.COLLECTION_USERS)
-                .whereEqualTo(Const.EMAIL, binding.inputEmail.getText().toString().trim().toLowerCase())
-                .whereEqualTo(Const.PASSWORD, binding.inputPassword.getText().toString().trim())
+        _const.firestore
+                .collection(_const.COLLECTION_USERS)
+                .whereEqualTo(_const.EMAIL, binding.inputEmail.getText().toString().trim().toLowerCase())
+                .whereEqualTo(_const.PASSWORD, binding.inputPassword.getText().toString().trim())
                 .get()
                 .addOnCompleteListener(task -> {
                     boolean isCorrect = task.isSuccessful() && task.getResult() != null && task.getResult().getDocuments().size() == 1;
@@ -76,10 +76,10 @@ public class SignInActivity extends AppCompatActivity {
                             binding.layoutPassword.setError(null);
 
                         DocumentSnapshot currentUser = task.getResult().getDocuments().get(0);
-                        preferenceManager.putBoolean(Const.IS_SIGNED_IN, true);
-                        preferenceManager.putString(Const.ID, currentUser.getId());
-                        preferenceManager.putString(Const.NAME, currentUser.getString(Const.NAME));
-                        preferenceManager.putString(Const.IMAGE, currentUser.getString(Const.IMAGE));
+                        preferenceManager.putBoolean(_const.IS_SIGNED_IN, true);
+                        preferenceManager.putString(_const.ID, currentUser.getId());
+                        preferenceManager.putString(_const.NAME, currentUser.getString(_const.NAME));
+                        preferenceManager.putString(_const.IMAGE, currentUser.getString(_const.IMAGE));
 
                         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

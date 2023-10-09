@@ -9,18 +9,19 @@ import android.view.View;
 import com.evileye2002.real_timechatapp.adapters.FriendAdapter;
 import com.evileye2002.real_timechatapp.databinding.ActivityFriendBinding;
 import com.evileye2002.real_timechatapp.models.User;
-import com.evileye2002.real_timechatapp.utilities.Const;
+import com.evileye2002.real_timechatapp.utilities._const;
 import com.evileye2002.real_timechatapp.utilities.PreferenceManager;
+import com.evileye2002.real_timechatapp.utilities._firestore;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class FriendActivity extends AppCompatActivity {
     ActivityFriendBinding binding;
     PreferenceManager manager;
-    DocumentReference currentUser;
     String currentUserID;
 
     @Override
@@ -48,8 +49,7 @@ public class FriendActivity extends AppCompatActivity {
 
     void init() {
         manager = new PreferenceManager(getApplicationContext());
-        currentUserID = manager.getString(Const.ID);
-        currentUser = Const.userDoc(currentUserID);
+        currentUserID = manager.getString(_const.ID);
     }
 
     void setListener() {
@@ -72,25 +72,19 @@ public class FriendActivity extends AppCompatActivity {
     }
 
     void getFriends() {
-        Const.user_collection.get().addOnCompleteListener(task -> {
+        _firestore.allUsers().whereArrayContains(_const.FRIEND_LIST, currentUserID).get().addOnCompleteListener(task -> {
             loading(false);
             List<User> userList = new ArrayList<>();
-            boolean isExist = task.isSuccessful() && task.getResult() != null && task.getResult().getDocuments().size() > 0;
-            if (isExist) {
+            if (task.isSuccessful()) {
                 for (QueryDocumentSnapshot snapshot : task.getResult()) {
-                    if (snapshot.getId().equals(currentUserID))
-                        continue;
-                    if(snapshot.getString(Const.FRIENDS) != null)
-                        if (snapshot.getString(Const.FRIENDS).contains(currentUserID)) {
-                            User user = snapshot.toObject(User.class);
-                            user.id = snapshot.getId();
-                            userList.add(user);
-                        }
+                    User user = snapshot.toObject(User.class);
+                    user.id = snapshot.getId();
+                    userList.add(user);
                 }
                 if (userList.size() > 0) {
                     FriendAdapter adapter = new FriendAdapter(userList, user -> {
                         Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
-                        intent.putExtra(Const.USER, user);
+                        intent.putExtra(_const.USER, user);
                         startActivity(intent);
                         finish();
                     });

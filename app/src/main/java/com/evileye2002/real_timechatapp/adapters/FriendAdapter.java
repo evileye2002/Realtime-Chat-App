@@ -11,7 +11,7 @@ import com.evileye2002.real_timechatapp.databinding.ItemAddFriendBinding;
 import com.evileye2002.real_timechatapp.databinding.ItemFriendBinding;
 import com.evileye2002.real_timechatapp.listeners.UserListener;
 import com.evileye2002.real_timechatapp.models.User;
-import com.evileye2002.real_timechatapp.utilities.Funct;
+import com.evileye2002.real_timechatapp.utilities._funct;
 
 import java.util.List;
 
@@ -51,7 +51,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.FriendView
         }
 
         void setData(User user){
-            binding.imageProfile.setImageBitmap(Funct.stringToBitmap(user.image));
+            binding.imageProfile.setImageBitmap(_funct.stringToBitmap(user.image));
             binding.textName.setText(user.name);
             binding.getRoot().setOnClickListener(v -> userListener.onItemClick(user));
         }

@@ -20,8 +20,9 @@ import com.evileye2002.real_timechatapp.models.ChatMessage;
 import com.evileye2002.real_timechatapp.models.Conversation;
 import com.evileye2002.real_timechatapp.models.Members;
 import com.evileye2002.real_timechatapp.models.User;
-import com.evileye2002.real_timechatapp.utilities.Const;
-import com.evileye2002.real_timechatapp.utilities.Funct;
+import com.evileye2002.real_timechatapp.utilities._const;
+import com.evileye2002.real_timechatapp.utilities._firestore;
+import com.evileye2002.real_timechatapp.utilities._funct;
 import com.evileye2002.real_timechatapp.utilities.PreferenceManager;
 import com.evileye2002.real_timechatapp.utilities.Timestamp;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -31,7 +32,7 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -44,8 +45,8 @@ public class ChatActivity extends AppCompatActivity {
     Conversation currentCon;
     List<ChatMessage> mainMessageList;
     List<ChatMessage> pendingList;
-    List<Members> memberList;
-    List<String> countList;
+    List<Members> membersDetails;
+    int countPending = 0;
     ChatAdapter adapter;
 
     @Override
@@ -56,7 +57,6 @@ public class ChatActivity extends AppCompatActivity {
         init();
         setListener();
         checkConversation();
-        //listenMessage();
     }
 
     @Override
@@ -68,20 +68,20 @@ public class ChatActivity extends AppCompatActivity {
 
     void init() {
         manager = new PreferenceManager(getApplicationContext());
-        currentUserID = manager.getString(Const.ID);
-        receiverUser = (User) getIntent().getSerializableExtra(Const.USER);
-        currentCon = (Conversation) getIntent().getSerializableExtra(Const.CONVERSATION);
+        currentUserID = manager.getString(_const.ID);
+        receiverUser = (User) getIntent().getSerializableExtra(_const.USER);
+        currentCon = (Conversation) getIntent().getSerializableExtra(_const.CONVERSATION);
         currentConID = currentCon != null ? currentCon.id : "";
         mainMessageList = new ArrayList<>();
         pendingList = new ArrayList<>();
-        memberList = new ArrayList<>();
-        countList = new ArrayList<>();
-
+        membersDetails = new ArrayList<>();
+        adapter = new ChatAdapter(mainMessageList, currentUserID, membersDetails, this::showDialog);
     }
 
     void setListener() {
         binding.imageBack.setOnClickListener(v -> onBackPressed());
         binding.layoutSend.setOnClickListener(v -> sendMessage());
+        binding.recyclerView.setAdapter(adapter);
     }
 
     void loading(Boolean isLoading) {
@@ -97,8 +97,8 @@ public class ChatActivity extends AppCompatActivity {
     void resendMessage(ChatMessage chat) {
         if (chat.message.isEmpty())
             return;
-        //String pendingID = Integer.toString(mainMessageList.size() + 1);
-        String pendingID = Integer.toString(countList.size() + 1);
+
+        String pendingID = Integer.toString(countPending + 1);
         String msg = chat.message;
         pendingList.remove(chat);
         mainMessageList.remove(chat);
@@ -113,50 +113,25 @@ public class ChatActivity extends AppCompatActivity {
             if (binding.internetState.getVisibility() != View.GONE)
                 binding.internetState.setVisibility(View.GONE);
             HashMap<String, Object> message = new HashMap<>();
-            message.put(Const.SENDER_ID, currentUserID);
-            message.put(Const.MESSAGE, msg);
-            message.put(Const.TIMESTAMP, result);
-            message.put(Const.PENDING_ID, pendingID);
+            message.put(_const.SENDER_ID, currentUserID);
+            message.put(_const.MESSAGE, msg);
+            message.put(_const.TIMESTAMP, result);
+            message.put(_const.PENDING_ID, pendingID);
 
-            if (currentConID.equals("")) {
-                addConversation(msg, result, message);
-            } else {
-                Const.chat_collection(currentConID).add(message).addOnCompleteListener(task -> {
-                    boolean isValid = task.isSuccessful() && task.getResult() != null;
-                    if (isValid)
-                        updateConversation(msg, result);
-                });
-            }
+            _firestore.allChats(currentConID).add(message).addOnCompleteListener(task -> {
+                boolean isValid = task.isSuccessful() && task.getResult() != null;
+                if (isValid)
+                    updateConversation(msg, result);
+            });
         });
         getTimestamp.execute();
     }
 
     void sendMessage() {
-        /*String msg = binding.inputMessage.getText().toString();
-        String timestamp = Funct.dateToString(new Date(), "dd/MM/yyyy-HH:mm:ss");
-
-        HashMap<String, Object> message = new HashMap<>();
-        message.put(Const.SENDER_ID, currentUserID);
-        message.put(Const.MESSAGE, msg);
-        message.put(Const.TIMESTAMP, timestamp);
-
-        if (conversationID.equals("")) {
-            addConversation(msg, timestamp, message);
-        } else {
-            Const.chat_collection(conversationID).add(message).addOnCompleteListener(task -> {
-                boolean isValid = task.isSuccessful() && task.getResult() != null;
-                if (isValid)
-                    updateConversation(msg, timestamp);
-                binding.inputMessage.setText(null);
-            });
-        }*/
         if (binding.inputMessage.getText().toString().isEmpty())
             return;
-        /*String lastTimestamp1 = listPending.get(listPending.size()).timestamp;
-        String lastTimestamp2 = listPending.get(listPending.size() - 1).timestamp;
-        String lastTimestamp3 = listPending.get(listPending.size() - 2).timestamp;*/
 
-        String pendingID = Integer.toString(countList.size() + 1);
+        String pendingID = Integer.toString(countPending + 1);
         String msg = binding.inputMessage.getText().toString();
         pendingSend(pendingID, msg);
 
@@ -171,21 +146,18 @@ public class ChatActivity extends AppCompatActivity {
 
             if (binding.internetState.getVisibility() != View.GONE)
                 binding.internetState.setVisibility(View.GONE);
-            HashMap<String, Object> message = new HashMap<>();
-            message.put(Const.SENDER_ID, currentUserID);
-            message.put(Const.MESSAGE, msg);
-            message.put(Const.TIMESTAMP, timestamp);
-            message.put(Const.PENDING_ID, pendingID);
 
-            if (currentConID.equals("")) {
-                addConversation(msg, timestamp, message);
-            } else {
-                Const.chat_collection(currentConID).add(message).addOnCompleteListener(task -> {
-                    boolean isValid = task.isSuccessful() && task.getResult() != null;
-                    if (isValid)
-                        updateConversation(msg, timestamp);
-                });
-            }
+            HashMap<String, Object> message = new HashMap<>();
+            message.put(_const.SENDER_ID, currentUserID);
+            message.put(_const.MESSAGE, msg);
+            message.put(_const.TIMESTAMP, timestamp);
+            message.put(_const.PENDING_ID, pendingID);
+
+            _firestore.allChats(currentConID).add(message).addOnCompleteListener(task -> {
+                boolean isValid = task.isSuccessful() && task.getResult() != null;
+                if (isValid)
+                    updateConversation(msg, timestamp);
+            });
         });
         getTimestamp.execute();
     }
@@ -193,108 +165,88 @@ public class ChatActivity extends AppCompatActivity {
     void pendingSend(String pendingID, String msg) {
         ChatMessage pendingChat = new ChatMessage();
         pendingChat.pendingID = pendingID;
-        pendingChat.timestamp = Funct.dateToString(new Date(), Const.dateFormat);
+        pendingChat.timestamp = _funct.dateToString(new Date(), _const.dateFormat);
         pendingChat.message = msg;
         pendingChat.senderID = currentUserID;
         pendingChat.status = "pending";
 
+        countPending++;
         pendingList.add(pendingChat);
         mainMessageList.add(pendingChat);
-        countList.add(pendingChat.pendingID);
-        updateChat();
         binding.inputMessage.setText(null);
-    }
-
-    void addConversation(String msg, String timestamp, HashMap<String, Object> message) {
-        Members currentUser = new Members(currentUserID, manager.getString(Const.NAME), manager.getString(Const.IMAGE));
-        Members member = new Members(receiverUser.id, receiverUser.name, receiverUser.image);
-        memberList.add(currentUser);
-        memberList.add(member);
-
-        HashMap<String, Object> conversation = new HashMap<>();
-        conversation.put(Const.IS_GROUP, false);
-        conversation.put(Const.COLLECTION_MEMBERS, memberList);
-
-        conversation.put(Const.SENDER_ID, currentUserID);
-        conversation.put(Const.RECEIVER_ID, receiverUser.id);
-
-        conversation.put(Const.LAST_SENDER_ID, currentUserID);
-        conversation.put(Const.LAST_MESSAGE, msg);
-        conversation.put(Const.LAST_TIMESTAMP, timestamp);
-
-        Const.con_collection.add(conversation).addOnCompleteListener(task -> {
-            boolean isValid = task.isSuccessful() && task.getResult() != null;
-            if (isValid) {
-                String id = task.getResult().getId();
-                currentConID = id == null ? "" : id;
-                if (!currentConID.equals(""))
-                    listenMessage();
-                Const.chat_collection(task.getResult().getId()).add(message);
-            }
-            binding.inputMessage.setText(null);
-        });
+        updateChat();
     }
 
     void updateConversation(String msg, String timestamp) {
         HashMap<String, Object> update = new HashMap<>();
-        update.put(Const.LAST_SENDER_ID, currentUserID);
-        update.put(Const.LAST_MESSAGE, msg);
-        update.put(Const.LAST_TIMESTAMP, timestamp);
+        update.put(_const.LAST_SENDER_ID, currentUserID);
+        update.put(_const.LAST_MESSAGE, msg);
+        update.put(_const.LAST_TIMESTAMP, timestamp);
 
-        Const.conDoc(currentConID).update(update);
+        _firestore.singleCon(currentConID).update(update);
     }
 
     void checkConversation() {
-        if (currentConID.equals("")) {
+        if (currentCon == null) {
             getDetails(false);
             getConversation();
             return;
         }
         getDetails(currentCon.isGroup);
-        memberList = currentCon.memberList;
+        membersDetails = currentCon.membersDetails;
         listenMessage();
     }
 
     void getDetails(boolean isGroup) {
         if (isGroup) {
-            binding.imageConversation.setImageBitmap(Funct.stringToBitmap(currentCon.image));
+            binding.imageConversation.setImageBitmap(_funct.stringToBitmap(currentCon.image));
             binding.textName.setText(currentCon.name);
             return;
         }
-        binding.imageConversation.setImageBitmap(Funct.stringToBitmap(receiverUser.image));
+        binding.imageConversation.setImageBitmap(_funct.stringToBitmap(receiverUser.image));
         binding.textName.setText(receiverUser.name);
     }
 
-    void getConversation() {
-        Const.con_collection
-                .whereEqualTo(Const.SENDER_ID, currentUserID)
-                .whereEqualTo(Const.RECEIVER_ID, receiverUser.id)
-                .get()
-                .addOnCompleteListener(getConversationID);
-        Const.con_collection
-                .whereEqualTo(Const.SENDER_ID, receiverUser.id)
-                .whereEqualTo(Const.RECEIVER_ID, currentUserID)
-                .get()
-                .addOnCompleteListener(getConversationID);
+    String createConID(String ID1, String ID2) {
+        if (ID1.hashCode() < ID2.hashCode())
+            return ID1 + "_" + ID2;
+        else
+            return ID2 + "_" + ID1;
     }
 
-    final OnCompleteListener<QuerySnapshot> getConversationID = task -> {
-        loading(false);
-        boolean isValid = task.isSuccessful() && task.getResult() != null && task.getResult().getDocuments().size() > 0;
-        if (isValid) {
-            String id = task.getResult().getDocuments().get(0).getId();
-            currentConID = id == null ? "" : id;
-            if (!currentConID.equals("")) {
-                currentCon = task.getResult().getDocuments().get(0).toObject(Conversation.class);
-                memberList = currentCon.memberList;
+    void getConversation() {
+        currentConID = createConID(currentUserID, receiverUser.id);
+        _firestore.singleCon(currentConID).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                currentCon = task.getResult().toObject(Conversation.class);
+                if (currentCon == null) {
+                    createCon();
+                }
                 listenMessage();
             }
-        }
-    };
+        });
+    }
+
+    void createCon() {
+        Members currentUser = new Members(currentUserID, manager.getString(_const.NAME), manager.getString(_const.IMAGE));
+        Members member = new Members(receiverUser.id, receiverUser.name, receiverUser.image);
+        membersDetails.add(currentUser);
+        membersDetails.add(member);
+
+        HashMap<String, Object> conversation = new HashMap<>();
+        conversation.put(_const.IS_GROUP, false);
+        conversation.put(_const.MEMBER_LIST, Arrays.asList(currentUserID, receiverUser.id));
+        conversation.put(_const.MEMBERS_DETAILS, membersDetails);
+
+        _firestore.singleCon(currentConID).set(conversation).addOnCompleteListener(task -> {
+            if (task.isSuccessful())
+                listenMessage();
+        });
+    }
 
     void listenMessage() {
         loading(true);
-        Const.chat_collection(currentConID).orderBy("timestamp", Query.Direction.ASCENDING).addSnapshotListener(messageListener);
+        _firestore.allChats(currentConID).orderBy("timestamp", Query.Direction.ASCENDING).addSnapshotListener(messageListener);
     }
 
     final EventListener<QuerySnapshot> messageListener = (value, error) -> {
@@ -304,85 +256,52 @@ public class ChatActivity extends AppCompatActivity {
             loading(false);
             for (DocumentChange documentChange : value.getDocumentChanges()) {
                 ChatMessage newChat = documentChange.getDocument().toObject(ChatMessage.class);
-                countList.add(newChat.pendingID);
-                if(newChat.senderID.equals(currentUserID))
+
+                if (newChat.senderID.equals(currentUserID))
                     newChat.id = documentChange.getDocument().getId();
-                if (documentChange.getType() == DocumentChange.Type.REMOVED) {
-                    mainMessageList.removeIf(chatMain -> chatMain.pendingID.equals(newChat.pendingID));
-                    updateChat();
-                    return;
-                }
+
                 if (documentChange.getType() == DocumentChange.Type.ADDED) {
-                    /*if(!newChat.senderID.equals(currentUserID) && mainMessageList.size() > 0){
-                        mainMessageList.add(newChat);
-                        mainMessageList.sort(Comparator.comparing(o -> o.timestamp));
-                        adapter = new ChatAdapter(mainMessageList, currentUserID, memberList);
-                        binding.recyclerView.setAdapter(adapter);
-                        binding.recyclerView.smoothScrollToPosition(mainMessageList.size() - 1);
-                        return;
-                    }*/
-                    if (newChat.senderID.equals(currentUserID)){
-                        if (pendingList.size() > 0) {
-                            mainMessageList.forEach(chatMain -> {
-                                if (chatMain.status != null) {
-                                    if (chatMain.pendingID.equals(newChat.pendingID) && !chatMain.status.equals("complete")) {
-                                        pendingList.removeIf(pendingChat -> chatMain.pendingID.equals(pendingChat.pendingID));
-                                        chatMain.timestamp = newChat.timestamp;
-                                        chatMain.status = "complete";
-                                        chatMain.pendingID = "";
-                                        updateChat();
-                                    }
-                                }
-                            });
-                        /*for (ChatMessage pendingChat : mainMessageList) {
-                            if (pendingChat.pendingID.equals(""))
-                                continue;
-                            if (pendingChat.status == null)
-                                continue;
-                            if (pendingChat.pendingID.equals(newChat.pendingID) && !pendingChat.status.equals("1")) {
-                                pendingList.removeIf(chat2 -> pendingChat.pendingID.equals(chat2.pendingID));
-
-                                pendingChat.timestamp = newChat.timestamp;
-                                pendingChat.status = "1";
-                                pendingChat.pendingID = "";
-
-                                adapter = new ChatAdapter(mainMessageList, currentUserID, memberList);
-                                binding.recyclerView.setAdapter(adapter);
-                                binding.recyclerView.smoothScrollToPosition(mainMessageList.size() - 1);
-                            }
-                        }*/
-                            return;
-                        }
-                    }
-                    mainMessageList.add(newChat);
-                }
-                if (newChat.senderID.equals(currentUserID)) {
-                    /*if (documentChange.getType() == DocumentChange.Type.ADDED) {
-                    ChatMessage chat = documentChange.getDocument().toObject(ChatMessage.class);
-                    chatMessageList.add(chat);
-                }*/
-                    if (documentChange.getType() == DocumentChange.Type.MODIFIED) {
+                    if (newChat.senderID.equals(currentUserID) && pendingList.size() > 0) {
                         for (ChatMessage chatMain : mainMessageList) {
-                            if (chatMain.pendingID.equals(newChat.pendingID)) {
-                                mainMessageList.set(mainMessageList.indexOf(chatMain), newChat);
+                            if (chatMain.status == null)
+                                continue;
+
+                            if (chatMain.pendingID.equals(newChat.pendingID) && !chatMain.status.equals("complete")) {
+                                pendingList.removeIf(pendingChat -> chatMain.pendingID.equals(pendingChat.pendingID));
+                                chatMain.timestamp = newChat.timestamp;
+                                chatMain.status = "complete";
+                                adapter = new ChatAdapter(mainMessageList, currentUserID, membersDetails, this::showDialog);
+                                binding.recyclerView.setAdapter(adapter);
                                 break;
                             }
                         }
-                        updateChat();
                         return;
                     }
+                    countPending++;
+                    mainMessageList.add(newChat);
+                }
+
+                if (documentChange.getType() == DocumentChange.Type.REMOVED) {
+                    if (newChat.senderID.equals(currentUserID)) {
+                        //mainMessageList.removeIf(chatMain -> chatMain.pendingID.equals(newChat.pendingID));
+                        for (ChatMessage chatMain : mainMessageList) {
+                            if (chatMain.pendingID.equals(newChat.pendingID)) {
+                                mainMessageList.remove(chatMain);
+                                adapter.notifyItemRemoved(mainMessageList.indexOf(chatMain));
+                                break;
+                            }
+                        }
+                    }
+                    return;
                 }
             }
-            if (mainMessageList.size() > 0) {
-                updateChat();
-            }
+            updateChat();
         }
     };
 
     void updateChat() {
-        adapter = new ChatAdapter(mainMessageList, currentUserID, memberList, this::showDialog);
-        binding.recyclerView.setAdapter(adapter);
-        //binding.recyclerView.smoothScrollToPosition(mainMessageList.size() - 1);
+        adapter.notifyItemRangeInserted(mainMessageList.size(), mainMessageList.size());
+        binding.recyclerView.smoothScrollToPosition(mainMessageList.size());
     }
 
     void showDialog(ChatMessage chat) {
@@ -409,8 +328,8 @@ public class ChatActivity extends AppCompatActivity {
             dialog.dismiss();
         });
         delete.setOnClickListener(v -> {
-            if(chat.status == null && chat.id != null){
-                Const.chatDoc(currentConID,chat.id).delete();
+            if (chat.status == null && chat.id != null) {
+                _firestore.singleChat(currentConID, chat.id).delete();
             }
             if (chat.status != null)
                 if (chat.status.equals("pending")) {
