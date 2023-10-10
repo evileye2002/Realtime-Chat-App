@@ -14,7 +14,7 @@ import com.evileye2002.real_timechatapp.databinding.ItemReceivedMessageBinding;
 import com.evileye2002.real_timechatapp.databinding.ItemSendMessageBinding;
 import com.evileye2002.real_timechatapp.listeners.ChatListener;
 import com.evileye2002.real_timechatapp.models.ChatMessage;
-import com.evileye2002.real_timechatapp.models.Members;
+import com.evileye2002.real_timechatapp.models.Conversation;
 import com.evileye2002.real_timechatapp.utilities._funct;
 
 import java.util.ArrayList;
@@ -24,13 +24,13 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     final List<ChatMessage> chatMessageList;
     List<String> listDateFirst;
     List<String> listTimeLast;
-    List<Members> memberList;
+    List<Conversation.Members> memberList;
     ChatListener listener;
     final String currentUserID;
     Drawable bg_complete;
     Drawable bg_unComplete;
 
-    public ChatAdapter(List<ChatMessage> chatMessageList, String currentUserID, List<Members> memberList, ChatListener listener) {
+    public ChatAdapter(List<ChatMessage> chatMessageList, String currentUserID, List<Conversation.Members> memberList, ChatListener listener) {
         this.chatMessageList = chatMessageList;
         this.currentUserID = currentUserID;
         this.memberList = memberList;
@@ -134,7 +134,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 return true;
             });
 
-            for (Members member : memberList) {
+            for (Conversation.Members member : memberList) {
                 if (member.id.equals(currentUserID))
                     continue;
                 if (member.id.equals(chat.senderID)) {
@@ -212,7 +212,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 return true;
             });
 
-            for (Members member : memberList) {
+            for (Conversation.Members member : memberList) {
                 if (member.id.equals(currentUserID))
                     continue;
                 if (member.id.equals(chat.senderID)) {

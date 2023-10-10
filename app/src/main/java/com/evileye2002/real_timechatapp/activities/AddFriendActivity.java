@@ -46,31 +46,33 @@ public class AddFriendActivity extends AppCompatActivity {
 
     void setListener() {
         binding.imageBack.setOnClickListener(v -> onBackPressed());
-        binding.inputSearch.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (s.toString().trim().isEmpty()) {
-                    List<User> userList = new ArrayList<>();
-                    AddFriendAdapter adapter = new AddFriendAdapter(userList, user -> {
-
-                    });
-                    binding.recyclerView.setAdapter(adapter);
-                    return;
-                }
-                getUsers(s.toString());
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
+        binding.inputSearch.addTextChangedListener(searchUsers);
     }
+
+    final TextWatcher searchUsers = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            if (s.toString().trim().isEmpty()) {
+                List<User> userList = new ArrayList<>();
+                AddFriendAdapter adapter = new AddFriendAdapter(userList, user -> {
+
+                });
+                binding.recyclerView.setAdapter(adapter);
+                return;
+            }
+            getUsers(s.toString());
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+
+        }
+    };
 
     void loading(Boolean isLoading) {
         if (isLoading) {
@@ -87,30 +89,24 @@ public class AddFriendActivity extends AppCompatActivity {
         _firestore.allUsers().get().addOnCompleteListener(task -> {
             loading(false);
             List<User> userList = new ArrayList<>();
-            boolean isExist = task.isSuccessful() && task.getResult() != null && task.getResult().getDocuments().size() > 0;
-            if (isExist) {
+            if (task.isSuccessful()) {
                 for (QueryDocumentSnapshot snapshot : task.getResult()) {
-                    if (snapshot.getId().equals(currentUserID)) {
+                    if (snapshot.getId().equals(currentUserID))
+                        continue;
+                    User user = snapshot.toObject(User.class);
+                    user.id = snapshot.getId();
+                    if (user.name.contains(s) && user.friendList == null) {
+                        userList.add(user);
                         continue;
                     }
-
-                    if (snapshot.getString(_const.FRIEND_LIST) != null) {
-                        if (snapshot.getString(_const.FRIEND_LIST).contains(currentUserID))
-                            continue;
-                    }
-
-                    if (snapshot.getString(_const.NAME).contains(s)) {
-                        User user = snapshot.toObject(User.class);
-                        user.id = snapshot.getId();
+                    String friendList = user.friendList.toString();
+                    if (friendList.contains(currentUserID))
+                        continue;
+                    if (user.name.contains(s))
                         userList.add(user);
-                    }
                 }
                 if (userList.size() > 0) {
                     AddFriendAdapter adapter = new AddFriendAdapter(userList, user -> {
-                        //Request add friend
-                        //Delete user from list
-
-                        //String userFriends = user.friendList != null ? user.friendList : "";
                         List<String> userFriends = user.friendList != null ? user.friendList : new ArrayList<>();
                         userFriends.add(currentUserID);
                         _firestore.singleUser(user.id).update(_const.FRIEND_LIST, userFriends);

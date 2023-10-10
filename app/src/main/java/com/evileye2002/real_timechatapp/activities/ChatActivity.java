@@ -18,14 +18,12 @@ import com.evileye2002.real_timechatapp.adapters.ChatAdapter;
 import com.evileye2002.real_timechatapp.databinding.ActivityChatBinding;
 import com.evileye2002.real_timechatapp.models.ChatMessage;
 import com.evileye2002.real_timechatapp.models.Conversation;
-import com.evileye2002.real_timechatapp.models.Members;
 import com.evileye2002.real_timechatapp.models.User;
 import com.evileye2002.real_timechatapp.utilities._const;
 import com.evileye2002.real_timechatapp.utilities._firestore;
 import com.evileye2002.real_timechatapp.utilities._funct;
 import com.evileye2002.real_timechatapp.utilities.PreferenceManager;
 import com.evileye2002.real_timechatapp.utilities.Timestamp;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.Query;
@@ -45,7 +43,7 @@ public class ChatActivity extends AppCompatActivity {
     Conversation currentCon;
     List<ChatMessage> mainMessageList;
     List<ChatMessage> pendingList;
-    List<Members> membersDetails;
+    List<Conversation.Members> membersDetails;
     int countPending = 0;
     ChatAdapter adapter;
 
@@ -203,8 +201,17 @@ public class ChatActivity extends AppCompatActivity {
             binding.textName.setText(currentCon.name);
             return;
         }
-        binding.imageConversation.setImageBitmap(_funct.stringToBitmap(receiverUser.image));
-        binding.textName.setText(receiverUser.name);
+        if(receiverUser != null){
+            binding.imageConversation.setImageBitmap(_funct.stringToBitmap(receiverUser.image));
+            binding.textName.setText(receiverUser.name);
+            return;
+        }
+        for (Conversation.Members member : currentCon.membersDetails){
+            if(member.id.equals(currentUserID))
+                continue;
+            binding.imageConversation.setImageBitmap(_funct.stringToBitmap(member.image));
+            binding.textName.setText(member.name);
+        }
     }
 
     String createConID(String ID1, String ID2) {
@@ -228,8 +235,8 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     void createCon() {
-        Members currentUser = new Members(currentUserID, manager.getString(_const.NAME), manager.getString(_const.IMAGE));
-        Members member = new Members(receiverUser.id, receiverUser.name, receiverUser.image);
+        Conversation.Members currentUser = new Conversation.Members(currentUserID, manager.getString(_const.NAME), manager.getString(_const.IMAGE));
+        Conversation.Members member = new Conversation.Members(receiverUser.id, receiverUser.name, receiverUser.image);
         membersDetails.add(currentUser);
         membersDetails.add(member);
 
@@ -246,7 +253,9 @@ public class ChatActivity extends AppCompatActivity {
 
     void listenMessage() {
         loading(true);
-        _firestore.allChats(currentConID).orderBy("timestamp", Query.Direction.ASCENDING).addSnapshotListener(messageListener);
+        _firestore.allChats(currentConID)
+                .orderBy(_const.TIMESTAMP, Query.Direction.ASCENDING)
+                .addSnapshotListener(messageListener);
     }
 
     final EventListener<QuerySnapshot> messageListener = (value, error) -> {

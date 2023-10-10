@@ -11,4 +11,17 @@ public class Conversation implements Serializable {
     public List<String> memberList;
 
     public List<Members> membersDetails;
+
+    public static class Members implements Serializable {
+        public String id,name,image;
+
+        public Members(String id, String name, String image) {
+            this.id = id;
+            this.name = name;
+            this.image = image;
+        }
+
+        public Members() {
+        }
+    }
 }

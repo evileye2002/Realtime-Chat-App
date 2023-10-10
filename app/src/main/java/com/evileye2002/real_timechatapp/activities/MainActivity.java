@@ -9,33 +9,36 @@ import androidx.core.view.GravityCompat;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.evileye2002.real_timechatapp.R;
+import com.evileye2002.real_timechatapp.adapters.ConversationAdapter;
 import com.evileye2002.real_timechatapp.databinding.ActivityMainBinding;
+import com.evileye2002.real_timechatapp.models.Conversation;
 import com.evileye2002.real_timechatapp.utilities.PreferenceManager;
 import com.evileye2002.real_timechatapp.utilities.Timestamp;
 import com.evileye2002.real_timechatapp.utilities._const;
 import com.evileye2002.real_timechatapp.utilities._firestore;
 import com.evileye2002.real_timechatapp.utilities._funct;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     ActivityMainBinding binding;
     PreferenceManager manager;
     String currentUserID;
+    List<Conversation> mainConList;
+    ConversationAdapter conAdapter;
     View navViewHeader;
     String timestamp = "";
 
@@ -50,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
         getCurrentUserData();
         getToken();
         requestPermission();
+        listenConversation();
     }
 
     void test() {
@@ -93,6 +97,13 @@ public class MainActivity extends AppCompatActivity {
         binding.navView.bringToFront();
         navViewHeader = binding.navView.getHeaderView(0);
         currentUserID = manager.getString(_const.ID);
+        mainConList = new ArrayList<>();
+        conAdapter = new ConversationAdapter(currentUserID, mainConList, conversation -> {
+            Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
+            intent.putExtra(_const.CONVERSATION,conversation);
+            startActivity(intent);
+            finish();
+        });
     }
 
     void setListener() {
@@ -114,6 +125,7 @@ public class MainActivity extends AppCompatActivity {
             }
             return true;
         });
+        binding.recyclerView.setAdapter(conAdapter);
         ImageView btnSettings = navViewHeader.findViewById(R.id.imageSettings);
         btnSettings.setOnClickListener(v -> {
             /*Intent intent = new Intent(getApplicationContext(), SettingActivity.class);
@@ -124,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
     void signOut() {
         HashMap<String, Object> updates = new HashMap<>();
         updates.put(_const.TOKEN, FieldValue.delete());
-        _firestore.singleCon(currentUserID).update(updates)
+        _firestore.singleUser(currentUserID).update(updates)
                 .addOnSuccessListener(unused -> {
                     manager.clear();
                     Intent intent = new Intent(getApplicationContext(), SignInActivity.class);
@@ -149,10 +161,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void updateToken(String token) {
-        _firestore.singleUser(currentUserID).update(_const.TOKEN, token)
-                .addOnFailureListener(e -> {
-
-                });
+        _firestore.singleUser(currentUserID).update(_const.TOKEN, token);
     }
 
     void loading(Boolean isLoading) {
@@ -165,4 +174,40 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    void listenConversation() {
+        loading(true);
+        _firestore.allCons()
+                .whereArrayContains(_const.MEMBER_LIST, currentUserID)
+                .orderBy(_const.LAST_TIMESTAMP, Query.Direction.DESCENDING)
+                .addSnapshotListener(conversationListener);
+    }
+
+    final EventListener<QuerySnapshot> conversationListener = (value, error) -> {
+        if (error != null)
+            return;
+        if (value != null) {
+            loading(false);
+            for (DocumentChange documentChange : value.getDocumentChanges()) {
+                Conversation conversation = documentChange.getDocument().toObject(Conversation.class);
+                conversation.id = documentChange.getDocument().getId();
+                if (documentChange.getType() == DocumentChange.Type.ADDED) {
+                    mainConList.add(conversation);
+                }
+                if (documentChange.getType() == DocumentChange.Type.MODIFIED) {
+                    for (Conversation newCon : mainConList) {
+                        if (newCon.id.equals(conversation.id)) {
+                            conAdapter.notifyItemChanged(mainConList.indexOf(newCon));
+                            break;
+                        }
+                    }
+                }
+            }
+            updateCon();
+        }
+    };
+
+    void updateCon(){
+        //mainConList.sort((o1, o2) -> o2.lastTimestamp.compareTo(o1.lastTimestamp));
+        conAdapter.notifyItemRangeInserted(mainConList.size(), mainConList.size());
+    }
 }

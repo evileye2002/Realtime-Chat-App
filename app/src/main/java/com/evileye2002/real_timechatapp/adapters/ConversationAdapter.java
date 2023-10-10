@@ -9,13 +9,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.evileye2002.real_timechatapp.databinding.ItemConversationBinding;
 import com.evileye2002.real_timechatapp.listeners.ConversationListener;
 import com.evileye2002.real_timechatapp.models.Conversation;
-import com.evileye2002.real_timechatapp.models.User;
-import com.evileye2002.real_timechatapp.utilities._const;
-import com.evileye2002.real_timechatapp.utilities._firestore;
 import com.evileye2002.real_timechatapp.utilities._funct;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapter.ConversationViewHolder> {
@@ -59,17 +54,16 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
             if (conversation.isGroup) {
                 binding.imageConversation.setImageBitmap(_funct.stringToBitmap(conversation.image));
                 binding.textName.setText(conversation.name);
-                binding.getRoot().setOnClickListener(v -> conversationListener.onItemClick(conversation, null));
+                binding.getRoot().setOnClickListener(v -> conversationListener.onItemClick(conversation));
             } else {
-                List<String> member = conversation.memberList;
-                member.remove(currentUserID);
-                _firestore.singleUser(member.get(0)).get().addOnCompleteListener(task -> {
-                    User user = task.getResult().toObject(User.class);
-                    user.id = task.getResult().getId();
-                    binding.imageConversation.setImageBitmap(_funct.stringToBitmap(user.image));
-                    binding.textName.setText(user.name);
-                    binding.getRoot().setOnClickListener(v -> conversationListener.onItemClick(null, user));
-                });
+                List<Conversation.Members> membersDetails = conversation.membersDetails;
+                for (Conversation.Members member : membersDetails){
+                  if(currentUserID.equals(member.id))
+                      continue;
+                    binding.imageConversation.setImageBitmap(_funct.stringToBitmap(member.image));
+                    binding.textName.setText(member.name);
+                    binding.getRoot().setOnClickListener(v -> conversationListener.onItemClick(conversation));
+                }
             }
             if (conversation.lastMessage != null) {
                 String lastSenderName = conversation.lastSenderID.equals(currentUserID) ? "Bạn" : conversation.lastSenderName;
