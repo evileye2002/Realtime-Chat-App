@@ -16,7 +16,7 @@
     <color name="input_bg_light">#ECECEC</color>
     <color name="icon_bg_light">#EBF5FF</color>
     <color name="icon_light">#0084FF</color>
-    <color name="received_message_bg_light">#D0E8FF</color>
+    <color name="received_message_bg_light">#E8F4FF</color>
     <color name="sent_message_bg_light">#0084FF</color>
 
     <!--Dark Theme-->
