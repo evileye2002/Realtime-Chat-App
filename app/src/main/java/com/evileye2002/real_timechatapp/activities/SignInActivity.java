@@ -12,6 +12,7 @@ import com.evileye2002.real_timechatapp.R;
 import com.evileye2002.real_timechatapp.databinding.ActivitySignInBinding;
 import com.evileye2002.real_timechatapp.utilities.PreferenceManager;
 import com.evileye2002.real_timechatapp.utilities._const;
+import com.evileye2002.real_timechatapp.utilities._firestore;
 import com.evileye2002.real_timechatapp.utilities._funct;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -64,8 +65,7 @@ public class SignInActivity extends AppCompatActivity {
 
     void signIn() {
         loading(true);
-        _const.firestore
-                .collection(_const.COLLECTION_USERS)
+        _firestore.allUsers()
                 .whereEqualTo(_const.EMAIL, binding.inputEmail.getText().toString().trim().toLowerCase())
                 .whereEqualTo(_const.PASSWORD, binding.inputPassword.getText().toString().trim())
                 .get()

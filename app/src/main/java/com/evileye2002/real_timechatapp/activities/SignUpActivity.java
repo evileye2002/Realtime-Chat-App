@@ -79,13 +79,11 @@ public class SignUpActivity extends AppCompatActivity {
             }
 
             //Check Email Exist
-            _const.firestore
-                    .collection(_const.COLLECTION_USERS)
+            _firestore.allUsers()
                     .whereEqualTo(_const.EMAIL, s.toString().trim().toLowerCase())
                     .get()
                     .addOnCompleteListener(task -> {
-                        boolean isExist = task.isSuccessful() && task.getResult() != null && task.getResult().getDocuments().size() > 0;
-                        if (isExist)
+                        if (task.isSuccessful())
                             isExistEmail = true;
                         else
                             isExistEmail = false;
@@ -115,7 +113,6 @@ public class SignUpActivity extends AppCompatActivity {
 
     void signUp() {
         loading(true);
-        FirebaseFirestore database = FirebaseFirestore.getInstance();
         HashMap<String, Object> user = new HashMap<>();
         user.put(_const.NAME, binding.inputName.getText().toString());
         user.put(_const.EMAIL, binding.inputEmail.getText().toString());

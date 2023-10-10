@@ -2,10 +2,14 @@ package com.evileye2002.real_timechatapp.utilities;
 
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 public class _firestore {
+     final static FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+     public final static FirebaseMessaging firestoreMessaging = FirebaseMessaging.getInstance();
     public static CollectionReference allUsers(){
-        return _const.firestore.collection(_const.COLLECTION_USERS);
+        return firestore.collection(_const.COLLECTION_USERS);
     }
 
     public static DocumentReference singleUser(String ID){
@@ -13,7 +17,7 @@ public class _firestore {
     }
 
     public static CollectionReference allCons(){
-        return _const.firestore.collection(_const.COLLECTION_CON);
+        return firestore.collection(_const.COLLECTION_CON);
     }
 
     public static DocumentReference singleCon(String ID){

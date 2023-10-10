@@ -1,13 +1,12 @@
 package com.evileye2002.real_timechatapp.utilities;
 
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.messaging.FirebaseMessaging;
 
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+
 public class _const {
-    public static final FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-    public static final FirebaseMessaging firestoreMessaging = FirebaseMessaging.getInstance();
     public static final String PREFERENCE_NAME = "chatAppPreference";
     public static final String dateFormat = "dd/MM/yyyy-HH:mm:ss";
 

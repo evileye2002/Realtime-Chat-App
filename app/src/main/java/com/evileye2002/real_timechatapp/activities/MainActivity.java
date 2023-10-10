@@ -30,6 +30,7 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -47,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        test();
+        //test();
         init();
         setListener();
         getCurrentUserData();
@@ -57,11 +58,30 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void test() {
-        Timestamp getTimestamp = new Timestamp(result -> {
-            timestamp = result;
-            String a = timestamp;
-        });
-        getTimestamp.execute();
+        //String raw = "Thứ Ba, 10 Tháng Mười, 2023, tuần 41";
+        String raw = "Thứ Ba, 10 Tháng Mười, 2023, tuần 41";
+        String[] pre = raw.toLowerCase().split(",");
+        String mm = pre[1]
+                .replace(" một", " 1")
+                .replace(" hai", " 2")
+                .replace(" ba", " 3")
+                .replace(" tư", " 4")
+                .replace(" năm", " 5")
+                .replace(" sáu", " 6")
+                .replace(" bảy", " 7")
+                .replace(" tám", " 8")
+                .replace(" chín", " 9")
+                .replace(" mười", " 10")
+                .replace(" mười một", " 11")
+                .replace(" mười hai", " 12");
+        String pre2 = pre[0] + "," + mm + "," + pre[2];
+
+        String raw2 = "thứ ba, 10 tháng 10, 2023";
+        String patternRaw = "EEEE, dd MMMM, y";
+        String patternTarget = "EEE,dd,MMM,y";
+        Date dateRaw = _funct.stringToDate(raw2, patternRaw);
+        String date = _funct.dateToString(dateRaw, patternTarget).toUpperCase();
+        String a = date;
     }
 
     @Override
@@ -100,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
         mainConList = new ArrayList<>();
         conAdapter = new ConversationAdapter(currentUserID, mainConList, conversation -> {
             Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
-            intent.putExtra(_const.CONVERSATION,conversation);
+            intent.putExtra(_const.CONVERSATION, conversation);
             startActivity(intent);
             finish();
         });
@@ -153,11 +173,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void getToken() {
-        _const.firestoreMessaging.getToken()
-                .addOnSuccessListener(this::updateToken)
-                .addOnFailureListener(e -> {
-
-                });
+        _firestore.firestoreMessaging.getToken()
+                .addOnSuccessListener(this::updateToken);
     }
 
     void updateToken(String token) {
@@ -183,10 +200,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     final EventListener<QuerySnapshot> conversationListener = (value, error) -> {
+        loading(false);
         if (error != null)
             return;
         if (value != null) {
-            loading(false);
             for (DocumentChange documentChange : value.getDocumentChanges()) {
                 Conversation conversation = documentChange.getDocument().toObject(Conversation.class);
                 conversation.id = documentChange.getDocument().getId();
@@ -206,7 +223,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    void updateCon(){
+    void updateCon() {
         //mainConList.sort((o1, o2) -> o2.lastTimestamp.compareTo(o1.lastTimestamp));
         conAdapter.notifyItemRangeInserted(mainConList.size(), mainConList.size());
     }

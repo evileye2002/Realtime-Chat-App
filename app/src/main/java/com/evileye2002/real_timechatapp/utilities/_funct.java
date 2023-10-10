@@ -38,7 +38,7 @@ public class _funct {
     }
 
     public static final String dateToString(Date date, String format) {
-        return new SimpleDateFormat(format, Locale.getDefault()).format(date);
+        return new SimpleDateFormat(format, new Locale("vi")).format(date);
     }
 
     public static final Date stringToDate(String sDate, String format) {

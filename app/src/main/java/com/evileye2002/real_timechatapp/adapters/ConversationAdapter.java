@@ -56,19 +56,29 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
                 binding.textName.setText(conversation.name);
                 binding.getRoot().setOnClickListener(v -> conversationListener.onItemClick(conversation));
             } else {
-                List<Conversation.Members> membersDetails = conversation.membersDetails;
-                for (Conversation.Members member : membersDetails){
-                  if(currentUserID.equals(member.id))
-                      continue;
+                for (Conversation.Members member : conversation.membersDetails) {
+                    if (currentUserID.equals(member.id))
+                        continue;
                     binding.imageConversation.setImageBitmap(_funct.stringToBitmap(member.image));
                     binding.textName.setText(member.name);
                     binding.getRoot().setOnClickListener(v -> conversationListener.onItemClick(conversation));
                 }
             }
             if (conversation.lastMessage != null) {
-                String lastSenderName = conversation.lastSenderID.equals(currentUserID) ? "Bạn" : conversation.lastSenderName;
+                if (currentUserID.equals(conversation.lastSenderID)){
+                    binding.textLastMessage.setText("Bạn" + ": " + conversation.lastMessage);
+                    return;
+                }
+                for (Conversation.Members member : conversation.membersDetails) {
+                    if(member.id.equals(conversation.lastSenderID)){
+                        binding.textLastMessage.setText(member.name + ": " + conversation.lastMessage);
+                        break;
+                    }
+                }
+
+                /*String lastSenderName = conversation.lastSenderID.equals(currentUserID) ? "Bạn" : conversation.lastSenderName;
                 //String lastTimestamp = Funct.dateToString(Funct.stringToDate(conversation.lastTimestamp, "dd/MM/yyyy-HH:mm:ss"), "HH:mm");
-                binding.textLastMessage.setText(lastSenderName + ": " + conversation.lastMessage);
+                binding.textLastMessage.setText(lastSenderName + ": " + conversation.lastMessage);*/
             }
         }
     }

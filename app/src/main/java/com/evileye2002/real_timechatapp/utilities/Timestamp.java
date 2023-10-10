@@ -9,11 +9,17 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class Timestamp extends AsyncTask<Void, Void, Void> {
     String url = "https://time.is/vi/Hanoi";
     String timestamp = "";
     TimestampListener listener;
+    String patternRaw = "EEEE, dd MMMM, y";
+    String patternTarget = "EEE,dd,MMM,y";
 
     public Timestamp(TimestampListener listener) {
         this.listener = listener;
@@ -37,7 +43,24 @@ public class Timestamp extends AsyncTask<Void, Void, Void> {
             Elements timeNow = doc.select("time#clock");
             Elements dateNow = doc.select("div#dd");
 
-            String date = dateNow.text().replace("Tháng ","Thg.").replace("tuần ","T.");
+            String[] pre = dateNow.text().toLowerCase().split(",");
+            String mm = pre[1]
+                    .replace(" một", " 1")
+                    .replace(" hai", " 2")
+                    .replace(" ba", " 3")
+                    .replace(" tư", " 4")
+                    .replace(" năm", " 5")
+                    .replace(" sáu", " 6")
+                    .replace(" bảy", " 7")
+                    .replace(" tám", " 8")
+                    .replace(" chín", " 9")
+                    .replace(" mười", " 10")
+                    .replace(" mười một", " 11")
+                    .replace(" mười hai", " 12");
+            String pre2 = pre[0] + "," + mm + "," + pre[2];
+            Date dateRaw = _funct.stringToDate(pre2, patternRaw);
+            String date = _funct.dateToString(dateRaw, patternTarget).toUpperCase();
+
             timestamp = timeNow.text() + ";" + date;
 
         } catch (IOException e) {

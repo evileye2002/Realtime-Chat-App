@@ -108,6 +108,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         void setData(ChatMessage chat) {
             if (chat.senderID.equals(currentUserID)){
+                binding.layoutReceiver.setVisibility(View.GONE);
+                binding.layoutSender.setVisibility(View.VISIBLE);
                 if (chat.status != null) {
                     binding.status.setVisibility(View.VISIBLE);
                     if (chat.status.equals("pending"))
@@ -128,6 +130,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }
 
             //Receiver
+            binding.layoutReceiver.setVisibility(View.VISIBLE);
+            binding.layoutSender.setVisibility(View.GONE);
             binding.textReceiver.setText(chat.message);
             binding.getRoot().setOnLongClickListener(v -> {
                 listener.onLongClick(chat);

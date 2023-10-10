@@ -134,9 +134,7 @@ public class ChatActivity extends AppCompatActivity {
         pendingSend(pendingID, msg);
 
         Timestamp getTimestamp = new Timestamp(result -> {
-            String timestamp = result;
-
-            if (timestamp.equals("")) {
+            if (result.equals("")) {
                 if (binding.internetState.getVisibility() != View.VISIBLE)
                     binding.internetState.setVisibility(View.VISIBLE);
                 return;
@@ -148,13 +146,13 @@ public class ChatActivity extends AppCompatActivity {
             HashMap<String, Object> message = new HashMap<>();
             message.put(_const.SENDER_ID, currentUserID);
             message.put(_const.MESSAGE, msg);
-            message.put(_const.TIMESTAMP, timestamp);
+            message.put(_const.TIMESTAMP, result);
             message.put(_const.PENDING_ID, pendingID);
 
             _firestore.allChats(currentConID).add(message).addOnCompleteListener(task -> {
                 boolean isValid = task.isSuccessful() && task.getResult() != null;
                 if (isValid)
-                    updateConversation(msg, timestamp);
+                    updateConversation(msg, result);
             });
         });
         getTimestamp.execute();
@@ -281,10 +279,9 @@ public class ChatActivity extends AppCompatActivity {
                                 chatMain.status = "complete";
                                 adapter = new ChatAdapter(mainMessageList, currentUserID, membersDetails, this::showDialog);
                                 binding.recyclerView.setAdapter(adapter);
-                                break;
+                                return;
                             }
                         }
-                        return;
                     }
                     countPending++;
                     mainMessageList.add(newChat);
