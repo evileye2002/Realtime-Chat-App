@@ -39,6 +39,7 @@ public class _const {
     public static final String CONVERSATION = "conversation";
     public static final String IS_GROUP = "isGroup";
     public static final String MEMBER_LIST = "memberList";
+    public static final String SEEN_LIST = "seenList";
     public static final String MEMBERS_DETAILS = "membersDetails";
     public static final String LAST_SENDER_ID = "lastSenderID";
     public static final String LAST_SENDER_NAME = "lastSenderName";

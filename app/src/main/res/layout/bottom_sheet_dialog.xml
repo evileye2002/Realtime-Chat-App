@@ -5,12 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/white"
-    android:padding="@dimen/_6sdp">
+    android:padding="@dimen/_3sdp">
 
     <LinearLayout
         android:id="@+id/layoutCopy"
-        android:layout_width="110dp"
+        android:layout_width="@dimen/_70sdp"
         android:layout_height="wrap_content"
+        android:background="@drawable/ripple_rounded"
         android:orientation="vertical"
         android:padding="@dimen/_6sdp"
         app:layout_constraintEnd_toStartOf="@id/layoutResend"
@@ -38,11 +39,12 @@
 
     <LinearLayout
         android:id="@+id/layoutResend"
-        android:layout_width="110dp"
+        android:layout_width="@dimen/_70sdp"
         android:layout_height="wrap_content"
+        android:background="@drawable/ripple_rounded"
         android:orientation="vertical"
-        android:visibility="gone"
         android:padding="@dimen/_6sdp"
+        android:visibility="gone"
         app:layout_constraintEnd_toStartOf="@id/layoutDelete"
         app:layout_constraintStart_toEndOf="@id/layoutCopy"
         app:layout_constraintTop_toTopOf="parent">
@@ -68,8 +70,9 @@
 
     <LinearLayout
         android:id="@+id/layoutDelete"
-        android:layout_width="110dp"
+        android:layout_width="@dimen/_70sdp"
         android:layout_height="wrap_content"
+        android:background="@drawable/ripple_rounded"
         android:orientation="vertical"
         android:padding="@dimen/_6sdp"
         app:layout_constraintEnd_toEndOf="parent"

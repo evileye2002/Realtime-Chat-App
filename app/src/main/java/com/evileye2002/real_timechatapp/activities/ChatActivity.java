@@ -1,6 +1,9 @@
 package com.evileye2002.real_timechatapp.activities;
 
 import android.app.Dialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -148,8 +151,7 @@ public class ChatActivity extends AppCompatActivity {
             message.put(_const.PENDING_ID, pendingID);
 
             _firestore.allChats(currentConID).add(message).addOnCompleteListener(task -> {
-                boolean isValid = task.isSuccessful() && task.getResult() != null;
-                if (isValid)
+                if (task.isSuccessful())
                     updateConversation(msg, result);
             });
         });
@@ -222,12 +224,11 @@ public class ChatActivity extends AppCompatActivity {
         _firestore.singleCon(currentConID).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 currentCon = task.getResult().toObject(Conversation.class);
+                membersDetails = currentCon.membersDetails;
                 if (currentCon == null) {
                     createCon();
                     return;
                 }
-                adapter = new ChatAdapter(mainMessageList, currentUserID, membersDetails, this::showDialog);
-                binding.recyclerView.setAdapter(adapter);
                 listenMessage();
             }
         });
@@ -246,8 +247,6 @@ public class ChatActivity extends AppCompatActivity {
 
         _firestore.singleCon(currentConID).set(conversation).addOnCompleteListener(task -> {
             if (task.isSuccessful()){
-                adapter = new ChatAdapter(mainMessageList, currentUserID, membersDetails, this::showDialog);
-                binding.recyclerView.setAdapter(adapter);
                 listenMessage();
             }
         });
@@ -267,17 +266,11 @@ public class ChatActivity extends AppCompatActivity {
             loading(false);
             for (DocumentChange documentChange : value.getDocumentChanges()) {
                 ChatMessage newChat = documentChange.getDocument().toObject(ChatMessage.class);
-
-                if (newChat.senderID.equals(currentUserID))
-                    newChat.id = documentChange.getDocument().getId();
-
+                newChat.id = documentChange.getDocument().getId();
                 if (documentChange.getType() == DocumentChange.Type.ADDED) {
                     if (newChat.senderID.equals(currentUserID) && pendingList.size() > 0) {
                         for (ChatMessage chatMain : mainMessageList) {
-                            if (chatMain.status == null)
-                                continue;
-
-                            if (chatMain.pendingID.equals(newChat.pendingID) && !chatMain.status.equals("complete")) {
+                            if (chatMain.pendingID.equals(newChat.pendingID)) {
                                 pendingList.removeIf(pendingChat -> chatMain.pendingID.equals(pendingChat.pendingID));
                                 chatMain.timestamp = newChat.timestamp;
                                 chatMain.status = "complete";
@@ -292,17 +285,14 @@ public class ChatActivity extends AppCompatActivity {
                 }
 
                 if (documentChange.getType() == DocumentChange.Type.REMOVED) {
-                    if (newChat.senderID.equals(currentUserID)) {
-                        //mainMessageList.removeIf(chatMain -> chatMain.pendingID.equals(newChat.pendingID));
-                        for (ChatMessage chatMain : mainMessageList) {
-                            if (chatMain.pendingID.equals(newChat.pendingID)) {
-                                mainMessageList.remove(chatMain);
-                                adapter.notifyItemRemoved(mainMessageList.indexOf(chatMain));
-                                break;
-                            }
+                    for (ChatMessage chatMain : mainMessageList) {
+                        if (chatMain.id.equals(newChat.id)) {
+                            int i = mainMessageList.indexOf(chatMain);
+                            mainMessageList.remove(chatMain);
+                            adapter.notifyItemRemoved(i);
+                            return;
                         }
                     }
-                    return;
                 }
             }
             updateChat();
@@ -310,7 +300,15 @@ public class ChatActivity extends AppCompatActivity {
     };
 
     void updateChat() {
+        if(adapter == null){
+            adapter = new ChatAdapter(mainMessageList, currentUserID, membersDetails, this::showDialog);
+            binding.recyclerView.setAdapter(adapter);
+        }
         adapter.notifyItemRangeInserted(mainMessageList.size(), mainMessageList.size());
+        if(mainMessageList.size() == 0){
+            binding.recyclerView.smoothScrollToPosition(mainMessageList.size());
+            return;
+        }
         binding.recyclerView.smoothScrollToPosition(mainMessageList.size() - 1);
     }
 
@@ -330,7 +328,9 @@ public class ChatActivity extends AppCompatActivity {
             delete.setVisibility(View.GONE);
 
         copy.setOnClickListener(v -> {
-            String msg = chat.message;
+            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText("label", chat.message);
+            clipboard.setPrimaryClip(clip);
             dialog.dismiss();
         });
         resend.setOnClickListener(v -> {
@@ -343,8 +343,9 @@ public class ChatActivity extends AppCompatActivity {
             }
             if (chat.status != null)
                 if (chat.status.equals("pending")) {
+                    int i = mainMessageList.indexOf(chat);
                     mainMessageList.remove(chat);
-                    updateChat();
+                    adapter.notifyItemRemoved(i);
                 }
             dialog.dismiss();
         });

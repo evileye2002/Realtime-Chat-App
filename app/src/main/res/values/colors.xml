@@ -5,6 +5,8 @@
     <color name="primary">#1C2E46</color>
     <color name="error">#B00020</color>
     <color name="online">#4FF878</color>
+    <color name="ripple_26_white">#8C8E91</color>
+    <color name="ripple_26_blue">#FF183D62</color>
 
     <!--Light Theme-->
     <color name="primary_light">#FFFFFF</color>
@@ -19,7 +21,7 @@
 
     <!--Dark Theme-->
     <color name="primary_dark">#242526</color>
-    <color name="secondary_dark">#242526</color>
+    <color name="secondary_dark">#3E4042</color>
     <color name="primary_text_dark">#E4E6EB</color>
     <color name="secondary_text_dark">#898C90</color>
     <color name="input_bg_dark">#3A3B3C</color>

@@ -9,13 +9,13 @@
 
     <com.makeramen.roundedimageview.RoundedImageView
         android:id="@+id/imageProfile"
-        android:layout_width="@dimen/_35sdp"
-        android:layout_height="@dimen/_35sdp"
+        android:layout_width="@dimen/_32sdp"
+        android:layout_height="@dimen/_32sdp"
         android:background="@drawable/bg_image"
         android:scaleType="centerCrop"
         app:layout_constraintBottom_toBottomOf="@id/imageSettings"
-        app:layout_constraintTop_toTopOf="@id/imageSettings"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/imageSettings"
         app:riv_oval="true" />
 
     <TextView
@@ -38,7 +38,8 @@
         android:id="@+id/imageSettings"
         android:layout_width="@dimen/_45sdp"
         android:layout_height="@dimen/_45sdp"
-        android:padding="@dimen/_11sdp"
+        android:background="@drawable/ripple_oval"
+        android:padding="@dimen/_13sdp"
         android:src="@drawable/ic_settings"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

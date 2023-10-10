@@ -83,7 +83,7 @@ public class SignUpActivity extends AppCompatActivity {
                     .whereEqualTo(_const.EMAIL, s.toString().trim().toLowerCase())
                     .get()
                     .addOnCompleteListener(task -> {
-                        if (task.isSuccessful())
+                        if (task.isSuccessful() && task.getResult().size() > 0)
                             isExistEmail = true;
                         else
                             isExistEmail = false;

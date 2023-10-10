@@ -16,7 +16,7 @@
         android:background="@color/white"
         app:headerLayout="@layout/navigation_header"
         app:itemIconTint="@color/icon_light"
-        app:itemRippleColor="@color/icon_bg_light"
+        app:itemRippleColor="@color/ripple_26_white"
         app:itemTextColor="@color/primary_text_light"
         app:menu="@menu/drawer_menu" />
 
@@ -92,7 +92,7 @@
             android:src="@drawable/ic_add"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:rippleColor="@color/icon_bg_light"
+            app:rippleColor="@color/ripple_26_blue"
             app:tint="@color/white"
             tools:ignore="SpeakableTextPresentCheck" />
 

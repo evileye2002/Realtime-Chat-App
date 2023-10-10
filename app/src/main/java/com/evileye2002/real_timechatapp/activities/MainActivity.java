@@ -118,12 +118,6 @@ public class MainActivity extends AppCompatActivity {
         navViewHeader = binding.navView.getHeaderView(0);
         currentUserID = manager.getString(_const.ID);
         mainConList = new ArrayList<>();
-        conAdapter = new ConversationAdapter(currentUserID, mainConList, conversation -> {
-            Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
-            intent.putExtra(_const.CONVERSATION, conversation);
-            startActivity(intent);
-            finish();
-        });
     }
 
     void setListener() {
@@ -145,7 +139,6 @@ public class MainActivity extends AppCompatActivity {
             }
             return true;
         });
-        binding.recyclerView.setAdapter(conAdapter);
         ImageView btnSettings = navViewHeader.findViewById(R.id.imageSettings);
         btnSettings.setOnClickListener(v -> {
             /*Intent intent = new Intent(getApplicationContext(), SettingActivity.class);
@@ -194,27 +187,38 @@ public class MainActivity extends AppCompatActivity {
     void listenConversation() {
         loading(true);
         _firestore.allCons()
-                .whereArrayContains(_const.MEMBER_LIST, currentUserID)
                 .orderBy(_const.LAST_TIMESTAMP, Query.Direction.DESCENDING)
                 .addSnapshotListener(conversationListener);
     }
 
     final EventListener<QuerySnapshot> conversationListener = (value, error) -> {
-        loading(false);
         if (error != null)
             return;
         if (value != null) {
+            loading(false);
             for (DocumentChange documentChange : value.getDocumentChanges()) {
-                Conversation conversation = documentChange.getDocument().toObject(Conversation.class);
-                conversation.id = documentChange.getDocument().getId();
+                Conversation newCon = documentChange.getDocument().toObject(Conversation.class);
+                newCon.id = documentChange.getDocument().getId();
                 if (documentChange.getType() == DocumentChange.Type.ADDED) {
-                    mainConList.add(conversation);
+                    if (newCon.memberList.toString().contains(currentUserID))
+                        mainConList.add(newCon);
                 }
                 if (documentChange.getType() == DocumentChange.Type.MODIFIED) {
-                    for (Conversation newCon : mainConList) {
-                        if (newCon.id.equals(conversation.id)) {
-                            conAdapter.notifyItemChanged(mainConList.indexOf(newCon));
-                            break;
+                    for (Conversation conMain : mainConList) {
+                        if (conMain.id.equals(newCon.id)) {
+                            conMain.lastMessage = newCon.lastMessage;
+                            conMain.lastSenderID = newCon.lastSenderID;
+                            conMain.lastTimestamp = newCon.lastTimestamp;
+                            //conAdapter.notifyItemChanged(mainConList.indexOf(conMain));
+                            mainConList.sort((o1, o2) -> o2.lastTimestamp.compareTo(o1.lastTimestamp));
+                            conAdapter = new ConversationAdapter(currentUserID, mainConList, conversation -> {
+                                Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
+                                intent.putExtra(_const.CONVERSATION, conversation);
+                                startActivity(intent);
+                                finish();
+                            });
+                            binding.recyclerView.setAdapter(conAdapter);
+                            return;
                         }
                     }
                 }
@@ -224,7 +228,15 @@ public class MainActivity extends AppCompatActivity {
     };
 
     void updateCon() {
-        //mainConList.sort((o1, o2) -> o2.lastTimestamp.compareTo(o1.lastTimestamp));
+        if(conAdapter == null){
+            conAdapter = new ConversationAdapter(currentUserID, mainConList, conversation -> {
+                Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
+                intent.putExtra(_const.CONVERSATION, conversation);
+                startActivity(intent);
+                finish();
+            });
+            binding.recyclerView.setAdapter(conAdapter);
+        }
         conAdapter.notifyItemRangeInserted(mainConList.size(), mainConList.size());
     }
 }
