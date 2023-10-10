@@ -74,12 +74,11 @@ public class MainActivity extends AppCompatActivity {
                 .replace(" mười", " 10")
                 .replace(" mười một", " 11")
                 .replace(" mười hai", " 12");
-        String pre2 = pre[0] + "," + mm + "," + pre[2];
+        String pre2 = "01:02:03, " + pre[0] + "," + mm + "," + pre[2];
 
-        String raw2 = "thứ ba, 10 tháng 10, 2023";
-        String patternRaw = "EEEE, dd MMMM, y";
-        String patternTarget = "EEE,dd,MMM,y";
-        Date dateRaw = _funct.stringToDate(raw2, patternRaw);
+        String patternRaw = "HH:mm:ss, EEEE, dd MMMM, y";
+        String patternTarget = "HH:mm:ss,EEE,dd,MMM,y";
+        Date dateRaw = _funct.stringToDate(pre2, patternRaw);
         String date = _funct.dateToString(dateRaw, patternTarget).toUpperCase();
         String a = date;
     }

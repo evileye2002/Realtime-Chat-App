@@ -97,11 +97,11 @@ public class ChatActivity extends AppCompatActivity {
         if (chat.message.isEmpty())
             return;
 
-        String pendingID = Integer.toString(countPending + 1);
+        //String pendingID = Integer.toString(countPending + 1);
         String msg = chat.message;
         pendingList.remove(chat);
         mainMessageList.remove(chat);
-        pendingSend(pendingID, msg);
+        //pendingSend(pendingID, msg);
 
         Timestamp getTimestamp = new Timestamp(result -> {
             if (result.equals("")) {
@@ -115,7 +115,7 @@ public class ChatActivity extends AppCompatActivity {
             message.put(_const.SENDER_ID, currentUserID);
             message.put(_const.MESSAGE, msg);
             message.put(_const.TIMESTAMP, result);
-            message.put(_const.PENDING_ID, pendingID);
+            //message.put(_const.PENDING_ID, pendingID);
 
             _firestore.allChats(currentConID).add(message).addOnCompleteListener(task -> {
                 boolean isValid = task.isSuccessful() && task.getResult() != null;
@@ -130,9 +130,10 @@ public class ChatActivity extends AppCompatActivity {
         if (binding.inputMessage.getText().toString().isEmpty())
             return;
 
-        String pendingID = Integer.toString(countPending + 1);
+        //String pendingID = Integer.toString(countPending + 1);
         String msg = binding.inputMessage.getText().toString();
-        pendingSend(pendingID, msg);
+        binding.inputMessage.setText(null);
+        //pendingSend(pendingID, msg);
 
         Timestamp getTimestamp = new Timestamp(result -> {
             if (result.equals("")) {
@@ -148,7 +149,7 @@ public class ChatActivity extends AppCompatActivity {
             message.put(_const.SENDER_ID, currentUserID);
             message.put(_const.MESSAGE, msg);
             message.put(_const.TIMESTAMP, result);
-            message.put(_const.PENDING_ID, pendingID);
+            //message.put(_const.PENDING_ID, pendingID);
 
             _firestore.allChats(currentConID).add(message).addOnCompleteListener(task -> {
                 if (task.isSuccessful())
@@ -161,7 +162,7 @@ public class ChatActivity extends AppCompatActivity {
     void pendingSend(String pendingID, String msg) {
         ChatMessage pendingChat = new ChatMessage();
         pendingChat.pendingID = pendingID;
-        pendingChat.timestamp = _funct.dateToString(new Date(), _const.dateFormat);
+        //pendingChat.timestamp = _funct.dateToString(new Date(), _const.dateFormat);
         pendingChat.message = msg;
         pendingChat.senderID = currentUserID;
         pendingChat.status = "pending";
@@ -173,7 +174,7 @@ public class ChatActivity extends AppCompatActivity {
         updateChat();
     }
 
-    void updateConversation(String msg, String timestamp) {
+    void updateConversation(String msg, Date timestamp) {
         HashMap<String, Object> update = new HashMap<>();
         update.put(_const.LAST_SENDER_ID, currentUserID);
         update.put(_const.LAST_MESSAGE, msg);
@@ -224,11 +225,11 @@ public class ChatActivity extends AppCompatActivity {
         _firestore.singleCon(currentConID).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 currentCon = task.getResult().toObject(Conversation.class);
-                membersDetails = currentCon.membersDetails;
                 if (currentCon == null) {
                     createCon();
                     return;
                 }
+                membersDetails = currentCon.membersDetails != null ? currentCon.membersDetails : new ArrayList<>();
                 listenMessage();
             }
         });
@@ -268,10 +269,11 @@ public class ChatActivity extends AppCompatActivity {
                 ChatMessage newChat = documentChange.getDocument().toObject(ChatMessage.class);
                 newChat.id = documentChange.getDocument().getId();
                 if (documentChange.getType() == DocumentChange.Type.ADDED) {
-                    if (newChat.senderID.equals(currentUserID) && pendingList.size() > 0) {
+                    /*if (pendingList.size() > 0) {
                         for (ChatMessage chatMain : mainMessageList) {
-                            if (chatMain.pendingID.equals(newChat.pendingID)) {
+                            if (chatMain.pendingID.equals(newChat.pendingID) && chatMain.senderID.equals(currentUserID)) {
                                 pendingList.removeIf(pendingChat -> chatMain.pendingID.equals(pendingChat.pendingID));
+                                chatMain.id = newChat.id;
                                 chatMain.timestamp = newChat.timestamp;
                                 chatMain.status = "complete";
                                 adapter = new ChatAdapter(mainMessageList, currentUserID, membersDetails, this::showDialog);
@@ -280,7 +282,8 @@ public class ChatActivity extends AppCompatActivity {
                             }
                         }
                     }
-                    countPending++;
+                    countPending++;*/
+
                     mainMessageList.add(newChat);
                 }
 
@@ -338,7 +341,7 @@ public class ChatActivity extends AppCompatActivity {
             dialog.dismiss();
         });
         delete.setOnClickListener(v -> {
-            if (chat.status == null && chat.id != null) {
+            if (chat.id != null) {
                 _firestore.singleChat(currentConID, chat.id).delete();
             }
             if (chat.status != null)

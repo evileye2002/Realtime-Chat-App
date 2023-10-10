@@ -1,10 +1,12 @@
 package com.evileye2002.real_timechatapp.models;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 public class Conversation implements Serializable {
-    public String id, lastSenderID, lastSenderName, lastMessage, lastTimestamp;
+    public String id, lastSenderID, lastSenderName, lastMessage;
+    public Date lastTimestamp;
     public boolean isGroup;
 
     public String name, image;

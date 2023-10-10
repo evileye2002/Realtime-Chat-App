@@ -16,10 +16,11 @@ import java.util.Locale;
 
 public class Timestamp extends AsyncTask<Void, Void, Void> {
     String url = "https://time.is/vi/Hanoi";
-    String timestamp = "";
+    //String timestamp = "";
+    Date timestamp;
     TimestampListener listener;
-    String patternRaw = "EEEE, dd MMMM, y";
-    String patternTarget = "EEE,dd,MMM,y";
+    //String patternRaw = "EEEE, dd MMMM, y";
+    //String patternTarget = "EEE,dd,MMM,y";
 
     public Timestamp(TimestampListener listener) {
         this.listener = listener;
@@ -38,6 +39,8 @@ public class Timestamp extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected Void doInBackground(Void... voids) {
+        String patternRaw = "HH:mm:ss, EEEE, dd MMMM, y";
+        String patternTarget = "HH:mm:ss,EEE,dd,MMM,y";
         try {
             Document doc = Jsoup.connect(url).userAgent("Jsoup client").get();
             Elements timeNow = doc.select("time#clock");
@@ -57,11 +60,11 @@ public class Timestamp extends AsyncTask<Void, Void, Void> {
                     .replace(" mười", " 10")
                     .replace(" mười một", " 11")
                     .replace(" mười hai", " 12");
-            String pre2 = pre[0] + "," + mm + "," + pre[2];
-            Date dateRaw = _funct.stringToDate(pre2, patternRaw);
-            String date = _funct.dateToString(dateRaw, patternTarget).toUpperCase();
+            String pre2 = timeNow.text() + ", " + pre[0] + "," + mm + "," + pre[2];
+            timestamp = _funct.stringToDate(pre2, patternRaw);
+            //String date = _funct.dateToString(dateRaw, patternTarget).toUpperCase();
 
-            timestamp = timeNow.text() + ";" + date;
+            //timestamp = timeNow.text() + ";" + date;
 
         } catch (IOException e) {
             return null;

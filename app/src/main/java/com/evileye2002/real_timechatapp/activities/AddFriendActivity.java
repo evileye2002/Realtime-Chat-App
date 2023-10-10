@@ -99,7 +99,7 @@ public class AddFriendActivity extends AppCompatActivity {
                         userList.add(user);
                         continue;
                     }
-                    String friendList = user.friendList.toString();
+                    String friendList = user.friendList != null ? user.friendList.toString() : "";
                     if (friendList.contains(currentUserID))
                         continue;
                     if (user.name.contains(s))
