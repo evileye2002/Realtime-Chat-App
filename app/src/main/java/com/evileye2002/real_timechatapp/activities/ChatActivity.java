@@ -293,6 +293,7 @@ public class ChatActivity extends AppCompatActivity {
                             int i = mainMessageList.indexOf(chatMain);
                             mainMessageList.remove(chatMain);
                             adapter.notifyItemRemoved(i);
+                            adapter.notifyItemRangeInserted(mainMessageList.size(), mainMessageList.size());
                             return;
                         }
                     }
