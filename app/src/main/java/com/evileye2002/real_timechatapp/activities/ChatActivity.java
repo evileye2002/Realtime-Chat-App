@@ -73,13 +73,11 @@ public class ChatActivity extends AppCompatActivity {
         mainMessageList = new ArrayList<>();
         pendingList = new ArrayList<>();
         membersDetails = new ArrayList<>();
-        adapter = new ChatAdapter(mainMessageList, currentUserID, membersDetails, this::showDialog);
     }
 
     void setListener() {
         binding.imageBack.setOnClickListener(v -> onBackPressed());
         binding.layoutSend.setOnClickListener(v -> sendMessage());
-        binding.recyclerView.setAdapter(adapter);
     }
 
     void loading(Boolean isLoading) {
@@ -226,7 +224,10 @@ public class ChatActivity extends AppCompatActivity {
                 currentCon = task.getResult().toObject(Conversation.class);
                 if (currentCon == null) {
                     createCon();
+                    return;
                 }
+                adapter = new ChatAdapter(mainMessageList, currentUserID, membersDetails, this::showDialog);
+                binding.recyclerView.setAdapter(adapter);
                 listenMessage();
             }
         });
@@ -244,8 +245,11 @@ public class ChatActivity extends AppCompatActivity {
         conversation.put(_const.MEMBERS_DETAILS, membersDetails);
 
         _firestore.singleCon(currentConID).set(conversation).addOnCompleteListener(task -> {
-            if (task.isSuccessful())
+            if (task.isSuccessful()){
+                adapter = new ChatAdapter(mainMessageList, currentUserID, membersDetails, this::showDialog);
+                binding.recyclerView.setAdapter(adapter);
                 listenMessage();
+            }
         });
     }
 
@@ -307,7 +311,7 @@ public class ChatActivity extends AppCompatActivity {
 
     void updateChat() {
         adapter.notifyItemRangeInserted(mainMessageList.size(), mainMessageList.size());
-        binding.recyclerView.smoothScrollToPosition(mainMessageList.size());
+        binding.recyclerView.smoothScrollToPosition(mainMessageList.size() - 1);
     }
 
     void showDialog(ChatMessage chat) {
