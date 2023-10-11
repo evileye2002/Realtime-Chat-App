@@ -6,7 +6,7 @@ import java.util.List;
 public class User implements Serializable {
     public String id, lastName, name, email, password, image, token;
     public List<String> friendList;
-    public List<String> friendRequestReceived;
+    public List<String> friendRequestList;
 
     public User() {
 

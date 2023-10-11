@@ -8,7 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.evileye2002.real_timechatapp.databinding.ItemAddFriendBinding;
-import com.evileye2002.real_timechatapp.listeners.UserListener;
+import com.evileye2002.real_timechatapp.listeners.AddFriendListener;
 import com.evileye2002.real_timechatapp.models.User;
 import com.evileye2002.real_timechatapp.utilities._funct;
 
@@ -16,11 +16,13 @@ import java.util.List;
 
 public class AddFriendAdapter extends RecyclerView.Adapter<AddFriendAdapter.AddFriendViewHolder>{
     List<User> userList;
-    final UserListener userListener;
+    final String currentUserID;
+    final AddFriendListener addFriendListener;
 
-    public AddFriendAdapter(List<User> userList, UserListener userListener) {
+    public AddFriendAdapter(List<User> userList, String currentUserID, AddFriendListener userListener) {
         this.userList = userList;
-        this.userListener = userListener;
+        this.currentUserID = currentUserID;
+        this.addFriendListener = userListener;
     }
 
     @NonNull
@@ -43,7 +45,6 @@ public class AddFriendAdapter extends RecyclerView.Adapter<AddFriendAdapter.AddF
     //ViewHolder
     class AddFriendViewHolder extends RecyclerView.ViewHolder{
         ItemAddFriendBinding binding;
-        String currentUserID;
 
         public AddFriendViewHolder(ItemAddFriendBinding binding) {
             super(binding.getRoot());
@@ -51,20 +52,23 @@ public class AddFriendAdapter extends RecyclerView.Adapter<AddFriendAdapter.AddF
         }
 
         void setData(User user){
-            String friendRequestReceived = user.friendRequestReceived != null ? user.friendRequestReceived.toString() : "";
+            binding.imageProfile.setImageBitmap(_funct.stringToBitmap(user.image));
+            binding.textName.setText(user.name);
+            String friendRequestReceived = user.friendRequestList != null ? user.friendRequestList.toString() : "";
             if(friendRequestReceived.contains(currentUserID)){
                 binding.imageAdd.setVisibility(View.GONE);
                 binding.imageCancel.setVisibility(View.VISIBLE);
                 binding.imageCancel.setOnClickListener(v -> {
-                    userListener.onItemClick(user);
+                    addFriendListener.onCancelClick(user);
+                    notifyDataSetChanged();
                 });
+                return;
             }
-
-            binding.imageProfile.setImageBitmap(_funct.stringToBitmap(user.image));
-            binding.textName.setText(user.name);
+            binding.imageAdd.setVisibility(View.VISIBLE);
+            binding.imageCancel.setVisibility(View.GONE);
             binding.imageAdd.setOnClickListener(v -> {
-                userListener.onItemClick(user);
-                userList.remove(user);
+                addFriendListener.onAddClick(user);
+                //userList.remove(user);
                 notifyDataSetChanged();
             });
         }
