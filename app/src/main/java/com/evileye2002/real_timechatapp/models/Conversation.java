@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 public class Conversation implements Serializable {
-    public String id, lastSenderID, lastSenderName, lastMessage;
+    public String id, lastSenderID, lastMessage;
     public Date lastTimestamp;
     public boolean isGroup;
 

@@ -8,6 +8,10 @@
         android:id="@+id/navFriend"
         android:icon="@drawable/ic_friends"
         android:title="@string/friends" />
+    <item
+        android:id="@+id/navFriendRequestReceived"
+        android:icon="@drawable/ic_friend_request_received"
+        android:title="@string/friend_request_received" />
 
     <group android:checkableBehavior="single" android:visible="false">
         <item android:title="">
@@ -19,6 +23,10 @@
 
     <item android:title="">
         <menu>
+            <item
+                android:id="@+id/navSettings"
+                android:icon="@drawable/ic_settings"
+                android:title="@string/settings" />
             <item
                 android:id="@+id/navSignOut"
                 android:icon="@drawable/ic_power"

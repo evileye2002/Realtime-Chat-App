@@ -29,4 +29,5 @@
     <string name="copy">Sao chép</string>
     <string name="delete_msg">Xóa tin nhắn</string>
     <string name="resend">Gửi lại</string>
+    <string name="friend_request_received">Lời mời kết bạn</string>
 </resources>

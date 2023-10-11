@@ -203,12 +203,13 @@ public class MainActivity extends AppCompatActivity {
                         mainConList.add(newCon);
                 }
                 if (documentChange.getType() == DocumentChange.Type.MODIFIED) {
+                    if(newCon.lastTimestamp == null)
+                        return;
                     for (Conversation conMain : mainConList) {
                         if (conMain.id.equals(newCon.id)) {
                             conMain.lastMessage = newCon.lastMessage;
                             conMain.lastSenderID = newCon.lastSenderID;
                             conMain.lastTimestamp = newCon.lastTimestamp;
-                            //conAdapter.notifyItemChanged(mainConList.indexOf(conMain));
                             mainConList.sort((o1, o2) -> o2.lastTimestamp.compareTo(o1.lastTimestamp));
                             conAdapter = new ConversationAdapter(currentUserID, mainConList, conversation -> {
                                 Intent intent = new Intent(getApplicationContext(), ChatActivity.class);

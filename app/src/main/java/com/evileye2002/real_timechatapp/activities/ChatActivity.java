@@ -29,6 +29,7 @@ import com.evileye2002.real_timechatapp.utilities.PreferenceManager;
 import com.evileye2002.real_timechatapp.utilities.Timestamp;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -93,70 +94,22 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
-    void resendMessage(ChatMessage chat) {
-        if (chat.message.isEmpty())
-            return;
-
-        //String pendingID = Integer.toString(countPending + 1);
-        String msg = chat.message;
-        pendingList.remove(chat);
-        mainMessageList.remove(chat);
-        //pendingSend(pendingID, msg);
-
-        Timestamp getTimestamp = new Timestamp(result -> {
-            if (result.equals("")) {
-                if (binding.internetState.getVisibility() != View.VISIBLE)
-                    binding.internetState.setVisibility(View.VISIBLE);
-                return;
-            }
-            if (binding.internetState.getVisibility() != View.GONE)
-                binding.internetState.setVisibility(View.GONE);
-            HashMap<String, Object> message = new HashMap<>();
-            message.put(_const.SENDER_ID, currentUserID);
-            message.put(_const.MESSAGE, msg);
-            message.put(_const.TIMESTAMP, result);
-            //message.put(_const.PENDING_ID, pendingID);
-
-            _firestore.allChats(currentConID).add(message).addOnCompleteListener(task -> {
-                boolean isValid = task.isSuccessful() && task.getResult() != null;
-                if (isValid)
-                    updateConversation(msg, result);
-            });
-        });
-        getTimestamp.execute();
-    }
-
     void sendMessage() {
         if (binding.inputMessage.getText().toString().isEmpty())
             return;
 
-        //String pendingID = Integer.toString(countPending + 1);
         String msg = binding.inputMessage.getText().toString();
-        binding.inputMessage.setText(null);
-        //pendingSend(pendingID, msg);
+        HashMap<String, Object> message = new HashMap<>();
+        message.put(_const.SENDER_ID, currentUserID);
+        message.put(_const.MESSAGE, msg);
+        message.put(_const.TIMESTAMP, FieldValue.serverTimestamp());
 
-        Timestamp getTimestamp = new Timestamp(result -> {
-            if (result.equals("")) {
-                if (binding.internetState.getVisibility() != View.VISIBLE)
-                    binding.internetState.setVisibility(View.VISIBLE);
-                return;
+        _firestore.allChats(currentConID).add(message).addOnCompleteListener(task -> {
+            if (task.isSuccessful()){
+                updateConversation(msg);
+                binding.inputMessage.setText(null);
             }
-
-            if (binding.internetState.getVisibility() != View.GONE)
-                binding.internetState.setVisibility(View.GONE);
-
-            HashMap<String, Object> message = new HashMap<>();
-            message.put(_const.SENDER_ID, currentUserID);
-            message.put(_const.MESSAGE, msg);
-            message.put(_const.TIMESTAMP, result);
-            //message.put(_const.PENDING_ID, pendingID);
-
-            _firestore.allChats(currentConID).add(message).addOnCompleteListener(task -> {
-                if (task.isSuccessful())
-                    updateConversation(msg, result);
-            });
         });
-        getTimestamp.execute();
     }
 
     void pendingSend(String pendingID, String msg) {
@@ -174,11 +127,11 @@ public class ChatActivity extends AppCompatActivity {
         updateChat();
     }
 
-    void updateConversation(String msg, Date timestamp) {
+    void updateConversation(String msg) {
         HashMap<String, Object> update = new HashMap<>();
         update.put(_const.LAST_SENDER_ID, currentUserID);
         update.put(_const.LAST_MESSAGE, msg);
-        update.put(_const.LAST_TIMESTAMP, timestamp);
+        update.put(_const.LAST_TIMESTAMP, FieldValue.serverTimestamp());
 
         _firestore.singleCon(currentConID).update(update);
     }
@@ -268,24 +221,8 @@ public class ChatActivity extends AppCompatActivity {
             for (DocumentChange documentChange : value.getDocumentChanges()) {
                 ChatMessage newChat = documentChange.getDocument().toObject(ChatMessage.class);
                 newChat.id = documentChange.getDocument().getId();
-                if (documentChange.getType() == DocumentChange.Type.ADDED) {
-                    /*if (pendingList.size() > 0) {
-                        for (ChatMessage chatMain : mainMessageList) {
-                            if (chatMain.pendingID.equals(newChat.pendingID) && chatMain.senderID.equals(currentUserID)) {
-                                pendingList.removeIf(pendingChat -> chatMain.pendingID.equals(pendingChat.pendingID));
-                                chatMain.id = newChat.id;
-                                chatMain.timestamp = newChat.timestamp;
-                                chatMain.status = "complete";
-                                adapter = new ChatAdapter(mainMessageList, currentUserID, membersDetails, this::showDialog);
-                                binding.recyclerView.setAdapter(adapter);
-                                return;
-                            }
-                        }
-                    }
-                    countPending++;*/
-
+                if (documentChange.getType() == DocumentChange.Type.ADDED)
                     mainMessageList.add(newChat);
-                }
 
                 if (documentChange.getType() == DocumentChange.Type.REMOVED) {
                     for (ChatMessage chatMain : mainMessageList) {
@@ -338,7 +275,7 @@ public class ChatActivity extends AppCompatActivity {
             dialog.dismiss();
         });
         resend.setOnClickListener(v -> {
-            resendMessage(chat);
+            //resendMessage(chat);
             dialog.dismiss();
         });
         delete.setOnClickListener(v -> {

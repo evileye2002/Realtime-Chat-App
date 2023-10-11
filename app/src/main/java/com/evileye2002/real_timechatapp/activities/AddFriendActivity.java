@@ -95,6 +95,7 @@ public class AddFriendActivity extends AppCompatActivity {
                         continue;
                     User user = snapshot.toObject(User.class);
                     user.id = snapshot.getId();
+
                     if (user.name.contains(s) && user.friendList == null) {
                         userList.add(user);
                         continue;

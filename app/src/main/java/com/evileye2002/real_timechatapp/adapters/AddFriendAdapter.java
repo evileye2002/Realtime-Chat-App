@@ -43,6 +43,7 @@ public class AddFriendAdapter extends RecyclerView.Adapter<AddFriendAdapter.AddF
     //ViewHolder
     class AddFriendViewHolder extends RecyclerView.ViewHolder{
         ItemAddFriendBinding binding;
+        String currentUserID;
 
         public AddFriendViewHolder(ItemAddFriendBinding binding) {
             super(binding.getRoot());
@@ -50,6 +51,15 @@ public class AddFriendAdapter extends RecyclerView.Adapter<AddFriendAdapter.AddF
         }
 
         void setData(User user){
+            String friendRequestReceived = user.friendRequestReceived != null ? user.friendRequestReceived.toString() : "";
+            if(friendRequestReceived.contains(currentUserID)){
+                binding.imageAdd.setVisibility(View.GONE);
+                binding.imageCancel.setVisibility(View.VISIBLE);
+                binding.imageCancel.setOnClickListener(v -> {
+                    userListener.onItemClick(user);
+                });
+            }
+
             binding.imageProfile.setImageBitmap(_funct.stringToBitmap(user.image));
             binding.textName.setText(user.name);
             binding.imageAdd.setOnClickListener(v -> {

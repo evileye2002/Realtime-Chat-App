@@ -102,31 +102,17 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         public ChatViewHolder(ItemChatBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
-            bg_complete = binding.getRoot().getResources().getDrawable(R.drawable.bg_complete);
-            bg_unComplete = binding.getRoot().getResources().getDrawable(R.drawable.bg_un_complete);
+            /*bg_complete = binding.getRoot().getResources().getDrawable(R.drawable.bg_complete);
+            bg_unComplete = binding.getRoot().getResources().getDrawable(R.drawable.bg_un_complete);*/
         }
 
         void setData(ChatMessage chat) {
+            binding.getRoot().setOnLongClickListener(v -> {
+                listener.onLongClick(chat);
+                return true;
+            });
             if (chat.senderID.equals(currentUserID)) {
-                /*binding.layoutReceiver.setVisibility(View.GONE);
-                binding.layoutSender.setVisibility(View.VISIBLE);
-                if (chat.status != null) {
-                    binding.status.setVisibility(View.VISIBLE);
-                    if (chat.status.equals("pending"))
-                        binding.status.setBackgroundDrawable(bg_unComplete);
-                    if (chat.status.equals("complete")) {
-                        binding.status.setBackgroundDrawable(bg_complete);
-                        binding.status.setImageResource(R.drawable.ic_check);
-                        chat.status = "0";
-                    } else if (chat.status.equals("0"))
-                        binding.status.setVisibility(View.GONE);
-                } else
-                    binding.status.setVisibility(View.GONE);*/
                 binding.textSender.setText(chat.message);
-                binding.getRoot().setOnLongClickListener(v -> {
-                    listener.onLongClick(chat);
-                    return true;
-                });
                 return;
             }
 
@@ -134,10 +120,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             binding.layoutReceiver.setVisibility(View.VISIBLE);
             binding.layoutSender.setVisibility(View.GONE);
             binding.textReceiver.setText(chat.message);
-            binding.getRoot().setOnLongClickListener(v -> {
-                listener.onLongClick(chat);
-                return true;
-            });
 
             for (Conversation.Members member : memberList) {
                 if (member.id.equals(currentUserID))
