@@ -2,7 +2,6 @@ package com.evileye2002.real_timechatapp.utilities;
 
 public class _const {
     public static final String PREFERENCE_NAME = "chatAppPreference";
-    public static final String dateFormat = "dd/MM/yyyy-HH:mm:ss";
 
     //Collections Key
     public static final String COLLECTION_USERS = "users";
@@ -20,7 +19,6 @@ public class _const {
     public static final String EMAIL = "email";
     public static final String PASSWORD = "password";
     public static final String FRIEND_LIST = "friendList";
-    public static final String FRIEND_REQUEST_LIST = "friendRequestList";
     public static final String TOKEN = "token";
     public static final String IS_SIGNED_IN = "isSignedIn";
 

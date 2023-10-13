@@ -18,12 +18,18 @@ import com.evileye2002.real_timechatapp.models.Conversation;
 import com.evileye2002.real_timechatapp.utilities._funct;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     final List<ChatMessage> chatMessageList;
-    List<String> listDateFirst;
-    List<String> listTimeLast;
+    List<ChatMessage> chatMessageListOld;
+    List<Date> listDayFirst;
+    List<Date> listTimeLast;
     List<Conversation.Members> memberList;
     ChatListener listener;
     final String currentUserID;
@@ -32,12 +38,12 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public ChatAdapter(List<ChatMessage> chatMessageList, String currentUserID, List<Conversation.Members> memberList, ChatListener listener) {
         this.chatMessageList = chatMessageList;
+        this.chatMessageListOld = chatMessageList;
         this.currentUserID = currentUserID;
         this.memberList = memberList;
         this.listener = listener;
 
-        listDateFirst = new ArrayList<>();
-        listTimeLast = new ArrayList<>();
+        sortDate();
 
         /*for (ChatMessage chat : chatMessageList) {
             String dates = listDateFirst.toString();
@@ -56,6 +62,42 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             listTimeLast.add(chat.timestamp);
         }
         Collections.reverse(chatMessageList);*/
+    }
+
+    void sortDate(){
+        listDayFirst = new ArrayList<>();
+        listTimeLast = new ArrayList<>();
+        Date preDate = null;
+        Date preTime = null;
+        for (ChatMessage chat : chatMessageList) {
+            if (preDate == null || !isSameDay(preDate, chat.timestamp)) {
+                listDayFirst.add(chat.timestamp);
+            }
+            preDate = chat.timestamp;
+        }
+        Collections.reverse(chatMessageList);
+        for (ChatMessage chat : chatMessageList) {
+            if (preTime == null || !isSameDay(preTime, chat.timestamp)) {
+                listTimeLast.add(chat.timestamp);
+            }
+            preTime = chat.timestamp;
+        }
+        Collections.reverse(chatMessageList);
+    }
+
+    Boolean isSameDay(Date date1, Date date2) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date1);
+        int day1 = cal.get(Calendar.DAY_OF_MONTH);
+        int month1 = cal.get(Calendar.MONTH);
+        int year1 = cal.get(Calendar.YEAR);
+
+        cal.setTime(date2);
+        int day2 = cal.get(Calendar.DAY_OF_MONTH);
+        int month2 = cal.get(Calendar.MONTH);
+        int year2 = cal.get(Calendar.YEAR);
+
+        return (day1 == day2) && (month1 == month2) && (year1 == year2);
     }
 
     @NonNull
@@ -78,6 +120,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             ((SendMessageViewHolder) holder).setData(chatMessageList.get(position));
         else
             ((ReceivedMessageViewHolder) holder).setData(chatMessageList.get(position));*/
+        if(chatMessageListOld.size() < chatMessageList.size())
+            sortDate();
         ((ChatViewHolder) holder).setData(chatMessageList.get(position));
     }
 
@@ -218,24 +262,24 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     String setDateFilter(String chatDateTime) {
-        for (String date : listDateFirst) {
+        /*for (String date : listDateFirst) {
             if (chatDateTime.equals(date)) {
                 String dateF = _funct.dateToString(_funct.stringToDate(date, "dd/MM/yyyy"), "dd/MM, yyyy");
                 listDateFirst.remove(date);
                 return dateF;
             }
-        }
+        }*/
         return null;
     }
 
     String setTimeFilter(String chatDateTime) {
-        for (String time : listTimeLast) {
+        /*for (String time : listTimeLast) {
             if (chatDateTime.equals(time)) {
                 String timeF = _funct.dateToString(_funct.stringToDate(time, "dd/MM/yyyy-HH:mm:ss"), "HH:mm");
                 listTimeLast.remove(time);
                 return timeF;
             }
-        }
+        }*/
         return null;
     }
 }
