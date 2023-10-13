@@ -8,10 +8,6 @@
         android:id="@+id/navFriend"
         android:icon="@drawable/ic_friends"
         android:title="@string/friends" />
-    <item
-        android:id="@+id/navFriendRequestReceived"
-        android:icon="@drawable/ic_friend_request_received"
-        android:title="@string/friend_request_received" />
 
     <group android:checkableBehavior="single" android:visible="false">
         <item android:title="">

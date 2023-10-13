@@ -9,11 +9,12 @@ import android.view.View;
 
 import com.evileye2002.real_timechatapp.adapters.AddFriendAdapter;
 import com.evileye2002.real_timechatapp.databinding.ActivityAddFriendBinding;
-import com.evileye2002.real_timechatapp.listeners.AddFriendListener;
 import com.evileye2002.real_timechatapp.models.User;
 import com.evileye2002.real_timechatapp.utilities._const;
 import com.evileye2002.real_timechatapp.utilities.PreferenceManager;
 import com.evileye2002.real_timechatapp.utilities._firestore;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
@@ -23,8 +24,6 @@ public class AddFriendActivity extends AppCompatActivity {
     ActivityAddFriendBinding binding;
     PreferenceManager manager;
     String currentUserID;
-    List<User> userList;
-    AddFriendAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +42,6 @@ public class AddFriendActivity extends AppCompatActivity {
     void init() {
         manager = new PreferenceManager(getApplicationContext());
         currentUserID = manager.getString(_const.ID);
-        userList = new ArrayList<>();
         loading(false);
     }
 
@@ -62,16 +60,8 @@ public class AddFriendActivity extends AppCompatActivity {
         public void onTextChanged(CharSequence s, int start, int before, int count) {
             if (s.toString().trim().isEmpty()) {
                 List<User> userList = new ArrayList<>();
-                AddFriendAdapter adapter = new AddFriendAdapter(userList, currentUserID, new AddFriendListener() {
-                    @Override
-                    public void onAddClick(User user) {
+                AddFriendAdapter adapter = new AddFriendAdapter(userList, user -> {
 
-                    }
-
-                    @Override
-                    public void onCancelClick(User user) {
-
-                    }
                 });
                 binding.recyclerView.setAdapter(adapter);
                 return;
@@ -118,70 +108,15 @@ public class AddFriendActivity extends AppCompatActivity {
                         userList.add(user);
                 }
                 if (userList.size() > 0) {
-                    adapter = new AddFriendAdapter(userList, currentUserID, new AddFriendListener() {
-                        @Override
-                        public void onAddClick(User user) {
-                            List<String> userFriendRequestList = user.friendRequestList != null ? user.friendRequestList : new ArrayList<>();
-                            userFriendRequestList.add(currentUserID);
-                            user.friendRequestList = userFriendRequestList;
-                            _firestore.singleUser(user.id).update(_const.FRIEND_REQUEST_LIST, userFriendRequestList);
-                        /*List<String> userFriends = user.friendList != null ? user.friendList : new ArrayList<>();
-                        userFriends.add(currentUserID);
-                        _firestore.singleUser(user.id).update(_const.FRIEND_LIST, userFriends);
-
-                        _firestore.singleUser(currentUserID).get().addOnCompleteListener(task1 -> {
-                            User currentUser = task1.getResult().toObject(User.class);
-                            List<String> currentUserFriends = currentUser.friendList != null ? currentUser.friendList : new ArrayList<>();
-                            currentUserFriends.add(user.id);
-                            _firestore.singleUser(currentUserID).update(_const.FRIEND_LIST, currentUserFriends);
-                        });*/
-                        }
-
-                        @Override
-                        public void onCancelClick(User user) {
-                            List<String> userFriendRequestList = user.friendRequestList != null ? user.friendRequestList : new ArrayList<>();
-                            userFriendRequestList.remove(currentUserID);
-                            user.friendRequestList = userFriendRequestList;
-                            _firestore.singleUser(user.id).update(_const.FRIEND_REQUEST_LIST, userFriendRequestList);
-                        }
+                    AddFriendAdapter adapter = new AddFriendAdapter(userList, user -> {
+                        _firestore.singleUser(user.id)
+                                .update(_const.FRIEND_LIST, FieldValue.arrayUnion(currentUserID));
+                        _firestore.singleUser(currentUserID)
+                                .update(_const.FRIEND_LIST, FieldValue.arrayUnion(user.id));
                     });
                     binding.recyclerView.setAdapter(adapter);
                 }
             }
         });
     }
-
-    /*void getUsers(String s){
-        loading(true);
-        _firestore.allUsers().addSnapshotListener((value, error) ->{
-            if(error != null)
-                return;
-            if (value != null){
-                loading(false);
-                for (DocumentChange documentChange : value.getDocumentChanges()){
-                    User newUser = documentChange.getDocument().toObject(User.class);
-                    newUser.id = documentChange.getDocument().getId();
-                    if(documentChange.getType() == DocumentChange.Type.ADDED){
-                        if (newUser.id.equals(currentUserID))
-                            continue;
-
-                        if (newUser.name.contains(s) && newUser.friendList == null) {
-                            userList.add(newUser);
-                            continue;
-                        }
-                        String friendList = newUser.friendList != null ? newUser.friendList.toString() : "";
-                        if (friendList.contains(currentUserID))
-                            continue;
-                        if (newUser.name.contains(s))
-                            userList.add(newUser);
-                    }
-                    if(documentChange.getType() == DocumentChange.Type.MODIFIED){
-                        if(newUser.id.equals(currentUserID))
-                            continue;
-
-                    }
-                }
-            }
-        });
-    }*/
 }
